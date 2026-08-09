@@ -1,10 +1,10 @@
 #include <Ultrasonic.h>
 #include <SteeringDualH.h>
 
-extern UltraSonic US60;
-extern UltraSonic US120;
-extern UltraSonic US240;
-extern UltraSonic US300;
+extern Ultrasonic US60;
+extern Ultrasonic US120;
+extern Ultrasonic US240;
+extern Ultrasonic US300;
 
 extern const int redLedPin;
 extern const int greenLedPin;
@@ -30,3 +30,44 @@ extern int veryFast;
 extern int tolerance;
 extern float K;
 
+struct SensorReading
+{
+    uint32_t timestamp;
+
+    // Distances in cm
+    uint8_t US60;
+    uint8_t US120;
+    uint8_t US240;
+    uint8_t US300;
+/*
+    // Distances in mm
+    uint8_t laserLeft;
+    uint8_t laserRight;
+
+    // Raw ADC values: 0-1023
+    uint16_t photoLeft;
+    uint16_t photoRight;
+
+    // Distances in mm
+    uint16_t IR1;
+    uint16_t IR2;
+    uint16_t IR3;
+
+    // IMU
+    float accelX;
+    float accelY;
+    float accelZ;
+
+    float gyroX;
+    float gyroY;
+    float gyroZ;
+*/
+    // Motor commands
+    int8_t motorLeftDirection;
+    uint8_t motorLeftSpeed;
+
+    int8_t motorRightDirection;
+    uint8_t motorRightSpeed;
+};
+
+extern SensorReading currentData;
