@@ -31,6 +31,9 @@ void SteeringDualH::straight(int velocity)
   int lVel = limit(_vel / _biasFactor);
   _right.setVelocity(rVel);
   _left.setVelocity(lVel);
+  /*Serial.print("biasFactor: ");
+  Serial.println(_biasFactor);*/
+
 }
 
 void SteeringDualH::stop()
@@ -44,6 +47,12 @@ void SteeringDualH::turn(int harshenss)
   int lVel = limit( (_vel - harshenss) / _biasFactor);
   _right.setVelocity(rVel);
   _left.setVelocity(lVel);
+  /*Serial.print("rVel: ");
+  Serial.println(rVel);
+  Serial.print("lVel: ");
+  Serial.println(lVel);*/
+  Serial.print("rVel - lVel: ");
+  Serial.println(rVel - lVel);
 }
 
 int SteeringDualH::bias()
