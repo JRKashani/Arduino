@@ -1,6 +1,4 @@
   #include "Globals.h"
-
-  THIS_SHOULD_NOT_COMPILE
   
   const int redLedPin   =  11;
   const int greenLedPin =  10;
@@ -8,8 +6,8 @@
   const int trigPin60   =  13;
   const int echoPin60   =  12;
 
-  const int trigPin120  =  4;
-  const int echoPin120  =  5;
+  const int trigPin120  =  6;
+  const int echoPin120  =  7;
 
   const int trigPin240  =  3;
   const int echoPin240  =  2;
@@ -28,7 +26,8 @@
   int fast       =  80;
   int veryFast   = 150;
 
-  int tolerance  =   1;
+  int tolerance_US            = 30;
+  int tolerance_PhotoResistor = 80;
   float K = 1;
 
   SensorReading currentData;

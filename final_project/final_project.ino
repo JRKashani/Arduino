@@ -23,10 +23,15 @@ void loop()
   // call info_vector with an adress of the vector
   info_input();
 
+  Serial.print("US60: ");
   Serial.println(currentData.US60);
+  Serial.print("US120: ");
   Serial.println(currentData.US120);
+  Serial.print("US240: ");
   Serial.println(currentData.US240);
+  Serial.print("US300: ");
   Serial.println(currentData.US300);
+  Serial.println(" ");
   // check if a stage had changed
   // activate 1 out of 5 movement functions
   //repeat

@@ -1,3 +1,7 @@
+
+#pragma once
+
+#include <Arduino.h>
 #include <Ultrasonic.h>
 #include <SteeringDualH.h>
 
@@ -27,7 +31,8 @@ extern int slow;
 extern int fast;
 extern int veryFast;
 
-extern int tolerance;
+extern int tolerance_US;
+extern int tolerance_PhotoResistor;
 extern float K;
 
 struct SensorReading
