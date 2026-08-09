@@ -1,7 +1,7 @@
 void info_input()
 {
     // timestamp
-    currentData.timestamp = millis();
+    //currentData.timestamp = millis();
 
     // Ultrasonic sensors
     currentData.US60  = US60 .ranging(CM);
