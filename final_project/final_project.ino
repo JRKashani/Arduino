@@ -1,9 +1,14 @@
+//initalizing all the variables
+
 void setup() {
-  // put your setup code here, to run once:
+  // declarations: 5 stages - open area, funnel, wall, wadi, flashlight; one information function
+  // 
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  // call info_vector with an adress of the vector
+  // check if a stage had changed
+  // activate 1 out of 5 movement functions
+  //repeat
 }
