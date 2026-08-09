@@ -1,9 +1,5 @@
 //initalizing all the variables
-  SteeringDualH car;
-  Ultrasonic US60(trigPin60, echoPin60);
-  Ultrasonic US120(trigPin120, echoPin120);
-  Ultrasonic US240(trigPin240, echoPin240);
-  Ultrasonic US300(trigPin300, echoPin300);
+#include "Globals.h"
 
 void setup()
 {
