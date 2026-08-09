@@ -1,0 +1,5 @@
+Ultrasonic	KEYWORD1
+timing	KEYWORD2
+ranging	KEYWORD2
+CM	LITERAL1	Constants
+INC	LITERAL1	Constants

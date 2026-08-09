@@ -1,0 +1,6 @@
+Motor		KEYWORD1
+setPins		KEYWORD2
+flip		KEYWORD2
+setVelocity	KEYWORD2
+stop		KEYWORD2
+velocity	KEYWORD2

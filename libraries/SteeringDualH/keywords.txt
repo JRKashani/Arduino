@@ -1,0 +1,9 @@
+SteeringDualH	KEYWORD1
+attach			KEYWORD2
+flipLeft		KEYWORD2
+flipRight		KEYWORD2
+straight		KEYWORD2
+stop			KEYWORD2
+turn			KEYWORD2
+bias			KEYWORD2
+setBias			KEYWORD2
