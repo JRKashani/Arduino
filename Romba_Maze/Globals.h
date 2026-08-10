@@ -156,6 +156,10 @@ extern const uint8_t ACCEL_Z_PIN;
 // ============================================================
 
 extern const int whiteLedPin;
+extern const int redLedPin;
+extern const int greenLedPin;
+
+extern int right_or_left;   // -1 for left, 1 for right
 
 extern SteeringDualH car;
 

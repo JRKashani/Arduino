@@ -80,6 +80,10 @@ const uint8_t ACCEL_Z_PIN = A2;
 // ============================================================
 
 const int whiteLedPin = 12;
+const int redLedPin   = 13;
+const int greenLedPin  = 10;
+
+int right_or_left = 0;   // -1 for left, 1 for right
 
 SteeringDualH car;
 

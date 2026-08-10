@@ -218,7 +218,30 @@ bool setupSensors()
     return true;
 }
 
+static float readLaser(
+    VL53L0X &sensor,
+    RollingAverage3 &filter,
+    bool &valid)
+{
+    const uint16_t distance_mm =
+        sensor.readRangeContinuousMillimeters();
 
+    const bool timedOut = sensor.timeoutOccurred();
+
+    if (timedOut || distance_mm == 65535U)
+    {
+        valid = false;
+        return NAN;
+    }
+
+    valid = true;
+
+    addReading(filter, (float)distance_mm);
+
+    // Use current measurement for fast obstacle response.
+    return (float)distance_mm;
+}
+/*
 static float readLaser(
     VL53L0X &sensor,
     RollingAverage3 &filter,
@@ -240,7 +263,7 @@ static float readLaser(
     return getAverage(filter);
 }
 
-
+*/
 void readLasers(SensorReading &data)
 {
     data.laserFront_mm = readLaser(
@@ -399,8 +422,7 @@ void clearSensorReading(SensorReading &data)
     data.accelY_g = NAN;
     data.accelZ_g = NAN;
 }
-
-/*
+const SensorReading& readSensors(uint8_t stage);
 // ============================================================
 // MAIN SENSOR ENTRY POINT
 // ============================================================
@@ -414,8 +436,7 @@ const SensorReading& readSensors(uint8_t stage)
         case STAGE_OPEN_AREA:
         case STAGE_FUNNEL:
         case STAGE_WALL_FOLLOWING:
-            // Starter acquisition set only. No navigation logic here.
-            readUltrasonics(currentData);
+            // readUltrasonics(currentData);
             readLasers(currentData);
             break;
 
@@ -436,4 +457,4 @@ const SensorReading& readSensors(uint8_t stage)
 
     currentData.timestamp = millis();
     return currentData;
-}*/
+}
