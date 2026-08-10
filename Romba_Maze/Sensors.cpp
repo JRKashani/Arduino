@@ -120,8 +120,37 @@ static void releaseLaserFromShutdown(uint8_t xshutPin)
     // instead of actively driving it HIGH.
     pinMode(xshutPin, INPUT);
 }
+/*
+static void scanI2C(const char* message)
+{
+    Serial.println();
+    Serial.println(message);
 
+    bool foundAny = false;
 
+    for (uint8_t address = 1; address < 127; address++)
+    {
+        Wire.beginTransmission(address);
+        uint8_t error = Wire.endTransmission();
+
+        if (error == 0)
+        {
+            Serial.print("  Found I2C device at 0x");
+
+            if (address < 16)
+                Serial.print('0');
+
+            Serial.println(address, HEX);
+            foundAny = true;
+        }
+    }
+
+    if (!foundAny)
+        Serial.println("  No I2C devices found");
+
+    Serial.println();
+}
+*/
 /*bool setupSensors()
 {
     
@@ -161,83 +190,110 @@ static void releaseLaserFromShutdown(uint8_t xshutPin)
     */
    bool setupSensors()
 {
-    Serial.println("=== VL53L0X setup ===");
+    //Serial.println("=== VL53L0X DEBUG ===");
 
     Wire.begin();
+    delay(50);
 
-    // --------------------------------------------------------
-    // 1. Shut down both lasers
-    // --------------------------------------------------------
-    Serial.println("Shutting down both lasers");
+    // ========================================================
+    // TEST 0: before touching XSHUT
+    // ========================================================
+
+    //scanI2C("Before touching XSHUT:");
+
+    // ========================================================
+    // TEST 1: shut down BOTH
+    // ========================================================
+
+    //Serial.println("Driving BOTH XSHUT pins LOW");
 
     holdLaserInShutdown(LASER_FRONT_XSHUT_PIN);
     holdLaserInShutdown(LASER_RIGHT_XSHUT_PIN);
 
     delay(50);
 
-    // --------------------------------------------------------
-    // 2. Start FRONT only
-    // --------------------------------------------------------
-    Serial.println("Releasing FRONT laser");
+    //scanI2C("Both sensors should now be OFF:");
+
+    // ========================================================
+    // TEST 2: release FRONT only
+    // ========================================================
+
+    //Serial.println("Releasing FRONT only");
 
     releaseLaserFromShutdown(LASER_FRONT_XSHUT_PIN);
-    delay(50);
 
-    Serial.println("Initializing FRONT at 0x29...");
+    delay(100);
+
+    //scanI2C("Only FRONT should now appear at 0x29:");
+
+    // ========================================================
+    // TEST 3: initialize FRONT
+    // ========================================================
+
+    //Serial.println("Calling laserFront.init()");
 
     if (!laserFront.init())
     {
-        Serial.println("ERROR: FRONT laser init failed");
+        Serial.println("ERROR: FRONT init failed");
         return false;
     }
 
-    Serial.println("FRONT initialized");
+    //Serial.println("FRONT init SUCCESS");
 
     laserFront.setTimeout(LASER_TIMEOUT_MS);
 
-    Serial.print("Changing FRONT address to 0x");
-    Serial.println(LASER_FRONT_ADDRESS, HEX);
+    // ========================================================
+    // TEST 4: change FRONT address
+    // ========================================================
+
+    //Serial.println("Moving FRONT from 0x29 to 0x30");
 
     laserFront.setAddress(LASER_FRONT_ADDRESS);
 
-    delay(20);
-
-    // --------------------------------------------------------
-    // 3. Start RIGHT
-    // --------------------------------------------------------
-    Serial.println("Releasing RIGHT laser");
-
-    releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
     delay(50);
 
-    Serial.println("Initializing RIGHT at 0x29...");
+    //scanI2C("FRONT should now appear at 0x30:");
+
+    // ========================================================
+    // TEST 5: release RIGHT
+    // ========================================================
+
+    //Serial.println("Releasing RIGHT");
+
+    releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
+
+    delay(100);
+
+    //scanI2C("Expected: RIGHT=0x29, FRONT=0x30:");
+
+    // ========================================================
+    // TEST 6: initialize RIGHT
+    // ========================================================
+
+    //Serial.println("Calling laserRight.init()");
 
     if (!laserRight.init())
     {
-        Serial.println("ERROR: RIGHT laser init failed");
+        Serial.println("ERROR: RIGHT init failed");
         return false;
     }
 
-    Serial.println("RIGHT initialized");
+    //Serial.println("RIGHT init SUCCESS");
 
     laserRight.setTimeout(LASER_TIMEOUT_MS);
 
-    Serial.print("Changing RIGHT address to 0x");
-    Serial.println(LASER_RIGHT_ADDRESS, HEX);
-
     laserRight.setAddress(LASER_RIGHT_ADDRESS);
 
-    delay(20);
+    delay(50);
 
-    // --------------------------------------------------------
-    // 4. Start continuous mode
-    // --------------------------------------------------------
-    Serial.println("Starting continuous mode");
+    //scanI2C("Final expected addresses: 0x30 and 0x31:");
+
+    // ========================================================
 
     laserFront.startContinuous();
     laserRight.startContinuous();
 
-    Serial.println("=== VL53L0X setup successful ===");
+    //Serial.println("=== BOTH LASERS READY ===");
 
     return true;
 }
