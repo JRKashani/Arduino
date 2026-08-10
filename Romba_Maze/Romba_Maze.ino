@@ -17,7 +17,7 @@ void setup()
         RIGHT_DIR_1, RIGHT_DIR_2, RIGHT_PWM);
     car.flipRight();
     car.stop();
-        /*
+        
     if (!setupSensors())
     {
         Serial.println("VL53L0X initialization failed");
@@ -31,7 +31,7 @@ void setup()
         }
     }
 
-    Serial.println("Sensors ready");*/
+    Serial.println("Sensors ready");
 }
 
 

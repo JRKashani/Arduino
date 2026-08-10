@@ -1,26 +1,6 @@
 #include "Sensors.h"
 
-#if defined(__has_include)
-    #if __has_include(<Wire.h>)
-        #include <Wire.h>
-    #else
-        #include <stdint.h>
-        #include <stddef.h>
-
-        class TwoWireStub
-        {
-        public:
-            void begin() {}
-            uint8_t beginTransmission(uint8_t) { return 0; }
-            uint8_t endTransmission() { return 0; }
-        };
-
-        static TwoWireStub Wire;
-    #endif
-#else
-    #include <Wire.h>
-#endif
-
+#include <Wire.h>
 #include <math.h>
 
 
@@ -34,6 +14,7 @@ static const uint16_t LASER_TIMEOUT_MS = 50;
 
 static const uint8_t LASER_FRONT_ADDRESS = 0x30;
 static const uint8_t LASER_RIGHT_ADDRESS = 0x31;
+static const uint8_t LASER_LEFT_ADDRESS  = 0x32;
 
 
 // ============================================================
@@ -53,6 +34,7 @@ static RollingAverage3 US300Filter = {{0}, 0, 0};
 
 static RollingAverage3 laserFrontFilter = {{0}, 0, 0};
 static RollingAverage3 laserRightFilter = {{0}, 0, 0};
+static RollingAverage3 laserLeftFilter  = {{0}, 0, 0};
 
 
 static void addReading(RollingAverage3 &filter, float value)
@@ -66,7 +48,6 @@ static void addReading(RollingAverage3 &filter, float value)
     if (filter.count < DISTANCE_AVERAGE_COUNT)
         filter.count++;
 }
-
 
 static float getAverage(const RollingAverage3 &filter)
 {
@@ -171,86 +152,24 @@ static void scanI2C(const char* message)
     Serial.println();
 }
 */
-/*bool setupSensors()
+
+bool setupSensors()
 {
-    
-    Wire.begin();
-
-    // Both sensors start at 0x29, so keep both disabled first.
-    holdLaserInShutdown(LASER_FRONT_XSHUT_PIN);
-    holdLaserInShutdown(LASER_RIGHT_XSHUT_PIN);
-    delay(10);
-
-    // Front laser: enable alone, initialize, assign unique address.
-    releaseLaserFromShutdown(LASER_FRONT_XSHUT_PIN);
-    delay(10);
-
-    laserFront.setTimeout(LASER_TIMEOUT_MS);
-    if (!laserFront.init())
-        return false;
-
-    laserFront.setAddress(LASER_FRONT_ADDRESS);
-
-    // Right laser: now enable it and assign another unique address.
-    releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
-    delay(10);
-
-    laserRight.setTimeout(LASER_TIMEOUT_MS);
-    if (!laserRight.init())
-        return false;
-
-    laserRight.setAddress(LASER_RIGHT_ADDRESS);
-
-    // Continuous ranging lets loop() read the latest measurement
-    // without starting a new single-shot measurement each time.
-    laserFront.startContinuous();
-    laserRight.startContinuous();
-
-    return true;
-    */
-   bool setupSensors()
-{
-    //Serial.println("=== VL53L0X DEBUG ===");
-
     Wire.begin();
     delay(50);
 
-    // ========================================================
-    // TEST 0: before touching XSHUT
-    // ========================================================
-
-    //scanI2C("Before touching XSHUT:");
-
-    // ========================================================
-    // TEST 1: shut down BOTH
-    // ========================================================
-
-    //Serial.println("Driving BOTH XSHUT pins LOW");
-
+    // All three VL53L0X sensors start at the default I2C address 0x29.
+    // Keep all of them shut down, then wake and re-address them one by one.
     holdLaserInShutdown(LASER_FRONT_XSHUT_PIN);
     holdLaserInShutdown(LASER_RIGHT_XSHUT_PIN);
-
+    holdLaserInShutdown(LASER_LEFT_XSHUT_PIN);
     delay(50);
 
-    //scanI2C("Both sensors should now be OFF:");
-
-    // ========================================================
-    // TEST 2: release FRONT only
-    // ========================================================
-
-    //Serial.println("Releasing FRONT only");
-
+    // FRONT: 0x29 -> 0x30
     releaseLaserFromShutdown(LASER_FRONT_XSHUT_PIN);
-
     delay(100);
 
-    //scanI2C("Only FRONT should now appear at 0x29:");
-
-    // ========================================================
-    // TEST 3: initialize FRONT
-    // ========================================================
-
-    //Serial.println("Calling laserFront.init()");
+    laserFront.setTimeout(LASER_TIMEOUT_MS);
 
     if (!laserFront.init())
     {
@@ -258,39 +177,14 @@ static void scanI2C(const char* message)
         return false;
     }
 
-    //Serial.println("FRONT init SUCCESS");
-
-    laserFront.setTimeout(LASER_TIMEOUT_MS);
-
-    // ========================================================
-    // TEST 4: change FRONT address
-    // ========================================================
-
-    //Serial.println("Moving FRONT from 0x29 to 0x30");
-
     laserFront.setAddress(LASER_FRONT_ADDRESS);
+    delay(20);
 
-    delay(50);
-
-    //scanI2C("FRONT should now appear at 0x30:");
-
-    // ========================================================
-    // TEST 5: release RIGHT
-    // ========================================================
-
-    //Serial.println("Releasing RIGHT");
-
+    // RIGHT: 0x29 -> 0x31
     releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
-
     delay(100);
 
-    //scanI2C("Expected: RIGHT=0x29, FRONT=0x30:");
-
-    // ========================================================
-    // TEST 6: initialize RIGHT
-    // ========================================================
-
-    //Serial.println("Calling laserRight.init()");
+    laserRight.setTimeout(LASER_TIMEOUT_MS);
 
     if (!laserRight.init())
     {
@@ -298,26 +192,31 @@ static void scanI2C(const char* message)
         return false;
     }
 
-    //Serial.println("RIGHT init SUCCESS");
-
-    laserRight.setTimeout(LASER_TIMEOUT_MS);
-
     laserRight.setAddress(LASER_RIGHT_ADDRESS);
+    delay(20);
 
-    delay(50);
+    // LEFT: 0x29 -> 0x32
+    releaseLaserFromShutdown(LASER_LEFT_XSHUT_PIN);
+    delay(100);
 
-    //scanI2C("Final expected addresses: 0x30 and 0x31:");
+    laserLeft.setTimeout(LASER_TIMEOUT_MS);
 
-    // ========================================================
+    if (!laserLeft.init())
+    {
+        Serial.println("ERROR: LEFT init failed");
+        return false;
+    }
 
+    laserLeft.setAddress(LASER_LEFT_ADDRESS);
+    delay(20);
+
+    // All sensors now have unique addresses and remain enabled.
     laserFront.startContinuous();
     laserRight.startContinuous();
-
-    //Serial.println("=== BOTH LASERS READY ===");
+    laserLeft.startContinuous();
 
     return true;
 }
-//}
 
 
 static float readLaser(
@@ -353,6 +252,11 @@ void readLasers(SensorReading &data)
         laserRight,
         laserRightFilter,
         data.laserRight_valid);
+
+    data.laserLeft_mm = readLaser(
+        laserLeft,
+        laserLeftFilter,
+        data.laserLeft_valid);
 }
 
 
@@ -473,9 +377,11 @@ void clearSensorReading(SensorReading &data)
 
     data.laserFront_mm = NAN;
     data.laserRight_mm = NAN;
+    data.laserLeft_mm = NAN;
 
     data.laserFront_valid = false;
     data.laserRight_valid = false;
+    data.laserLeft_valid = false;
 
     /*
     data.IRLeft_adc = NAN;
@@ -494,7 +400,7 @@ void clearSensorReading(SensorReading &data)
     data.accelZ_g = NAN;
 }
 
-
+/*
 // ============================================================
 // MAIN SENSOR ENTRY POINT
 // ============================================================
@@ -530,4 +436,4 @@ const SensorReading& readSensors(uint8_t stage)
 
     currentData.timestamp = millis();
     return currentData;
-}
+}*/

@@ -25,9 +25,11 @@ struct SensorReading
     // VL53L0X: millimetres
     float laserFront_mm;
     float laserRight_mm;
+    float laserLeft_mm;
 
     bool laserFront_valid;
     bool laserRight_valid;
+    bool laserLeft_valid;
 
     // --------------------------------------------------------
     // Sharp GP2Y0A21YK IR sensors - NOT CURRENTLY USED.
@@ -111,9 +113,15 @@ extern Ultrasonic US300;
 
 extern const uint8_t LASER_FRONT_XSHUT_PIN;
 extern const uint8_t LASER_RIGHT_XSHUT_PIN;
+extern const uint8_t LASER_LEFT_XSHUT_PIN;
 
 extern VL53L0X laserFront;
 extern VL53L0X laserRight;
+extern VL53L0X laserLeft;
+
+extern float laserLeftDistance;
+extern float laserRightDistance;
+extern float laserFrontDistance;
 
 
 // ============================================================
@@ -161,7 +169,3 @@ extern float K;
 
 extern const int targetDistanceWall;
 extern const int targetDistanceLight;
-
-// NOTE: the old BUTTON_PIN was pin 2, which conflicts with
-// US60_TRIG_PIN = 2. Define a new button pin only after choosing
-// a non-conflicting physical pin.

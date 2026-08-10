@@ -30,17 +30,22 @@ Ultrasonic US60(US60_TRIG_PIN, US60_ECHO_PIN);
 Ultrasonic US120(US120_TRIG_PIN, US120_ECHO_PIN);
 Ultrasonic US300(US300_TRIG_PIN, US300_ECHO_PIN);
 
-
 // ============================================================
 // VL53L0X
 // Mega hardware I2C: SDA = 20, SCL = 21
 // ============================================================
 
-const uint8_t LASER_FRONT_XSHUT_PIN = 30;
+const uint8_t LASER_FRONT_XSHUT_PIN = 33;
 const uint8_t LASER_RIGHT_XSHUT_PIN = 31;
+const uint8_t LASER_LEFT_XSHUT_PIN = 30;
 
 VL53L0X laserFront;
 VL53L0X laserRight;
+VL53L0X laserLeft;
+
+float laserLeftDistance = 0;
+float laserRightDistance = 0;
+float laserFrontDistance = 0;
 
 
 // ============================================================
