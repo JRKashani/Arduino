@@ -315,10 +315,10 @@ void clearSensorReading(SensorReading &data)
     data.US300_valid = false;
 
 
-    data.laserLeft_mm  = NAN;
+    data.laserFront_mm  = NAN;
     data.laserRight_mm = NAN;
 
-    data.laserLeft_valid  = false;
+    data.laserFront_valid  = false;
     data.laserRight_valid = false;
 
 
@@ -346,7 +346,7 @@ void clearSensorReading(SensorReading &data)
 // MAIN SENSOR FUNCTION
 // ============================================================
 
-SensorReading readSensors(uint8_t stage)
+const SensorReading& readSensors(uint8_t stage)
 {
     clearSensorReading(currentData);
 
@@ -367,25 +367,25 @@ SensorReading readSensors(uint8_t stage)
 
             currentData.US60_cm =
                 readUltrasonic(
-                    US60,
+                    US60_cm,
                     US60Filter,
                     currentData.US60_valid);
 
             currentData.US120_cm =
                 readUltrasonic(
-                    US120,
+                    US120_cm,
                     US120Filter,
                     currentData.US120_valid);
 
             currentData.US240_cm =
                 readUltrasonic(
-                    US240,
+                    US240_cm,
                     US240Filter,
                     currentData.US240_valid);
 
             currentData.US300_cm =
                 readUltrasonic(
-                    US300,
+                    US300_cm,
                     US300Filter,
                     currentData.US300_valid);
 
@@ -404,15 +404,15 @@ SensorReading readSensors(uint8_t stage)
 
             readWadiAnalog(currentData);
 
-            currentData.laserLeft_mm =
+            currentData.laserFront_mm =
                 readLaser(
-                    laserLeft,
-                    laserLeftFilter,
-                    currentData.laserLeft_valid);
+                    laserFront_mm,
+                    laserFrontFilter,
+                    currentData.laserFront_valid);
 
             currentData.laserRight_mm =
                 readLaser(
-                    laserRight,
+                    laserRight_mm,
                     laserRightFilter,
                     currentData.laserRight_valid);
 
@@ -430,15 +430,15 @@ SensorReading readSensors(uint8_t stage)
 
             readLightSensors(currentData);
 
-            currentData.laserLeft_mm =
+            currentData.laserFront_mm =
                 readLaser(
-                    laserLeft,
-                    laserLeftFilter,
-                    currentData.laserLeft_valid);
+                    laserFront_mm,
+                    laserFrontFilter,
+                    currentData.laserFront_valid);
 
             currentData.laserRight_mm =
                 readLaser(
-                    laserRight,
+                    laserRight_mm,
                     laserRightFilter,
                     currentData.laserRight_valid);
 

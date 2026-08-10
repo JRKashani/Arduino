@@ -21,10 +21,10 @@ struct SensorReading
     bool US300_valid;
 
     // VL53L0X: millimetres
-    float laserLeft_mm;
+    float laserFront_mm;
     float laserRight_mm;
 
-    bool laserLeft_valid;
+    bool laserFront_valid;
     bool laserRight_valid;
 
     // Sharp GP2Y0A21YK
@@ -50,13 +50,27 @@ struct SensorReading
 
 extern SensorReading currentData;
 
-extern Ultrasonic US60;
-extern Ultrasonic US120;
-extern Ultrasonic US240;
-extern Ultrasonic US300;
+extern Ultrasonic US60_cm;
+extern Ultrasonic US120_cm;
+extern Ultrasonic US240_cm;
+extern Ultrasonic US300_cm;
 
 extern const int redLedPin;
 extern const int greenLedPin;
+extern const int whiteLedPin;
+
+// ============================================================
+// STAGES
+// ============================================================
+
+enum RobotStage : uint8_t
+{
+    STAGE_OPEN_AREA = 1,
+    STAGE_FUNNEL = 2,
+    STAGE_WALL_FOLLOWING = 3,
+    STAGE_WADI = 4,
+    STAGE_LIGHT = 5
+};
 
 /*
 extern const int trigPin60;
@@ -144,8 +158,8 @@ extern const uint8_t ACCEL_Z_PIN;
 
 extern const uint8_t BUTTON_PIN;
 
-extern VL53L0X laserLeft;
-extern VL53L0X laserRight;
+extern VL53L0X laserFront_mm;
+extern VL53L0X laserRight_mm;
 
 extern const uint8_t IRLeftPin;
 extern const uint8_t IRRightPin;
@@ -166,3 +180,6 @@ extern int veryFast;
 extern int tolerance_US;
 extern int tolerance_PhotoResistor;
 extern float K;
+
+extern const int targetDistanceWall;
+extern const int targetDistanceLight;

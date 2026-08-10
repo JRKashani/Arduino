@@ -2,4 +2,6 @@
 
 #include "Globals.h"
 
-SensorReading readSensors(uint8_t stage);
+bool setupSensors();
+
+const SensorReading& readSensors(uint8_t stage);

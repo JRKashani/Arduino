@@ -71,11 +71,13 @@ const uint8_t ACCEL_Z_PIN = A2;
 // ============================================================
 
 const uint8_t BUTTON_PIN = 2;
+
+  /*const int redLedPin   =  11;
+  const int greenLedPin =  10;*/
+  const int whiteLedPin = 12;
+
+
 /*
-  const int redLedPin   =  11;
-  const int greenLedPin =  10;
-
-
   const int trigPin60   =  13;
   const int echoPin60   =  12;
 
@@ -96,7 +98,7 @@ const uint8_t BUTTON_PIN = 2;
 
   SteeringDualH car;
 
-  VL53L0X laserLeft;
+  VL53L0X laserFront;
   VL53L0X laserRight;
 
   int slow       =  50;
@@ -108,6 +110,6 @@ const uint8_t BUTTON_PIN = 2;
   float K = 1;
 
   const int targetDistanceWall = 30;
-  int targetDistanceLight = 12;
+  const int targetDistanceLight = 12;
 
   SensorReading currentData;
