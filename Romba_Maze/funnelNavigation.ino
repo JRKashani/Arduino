@@ -1,28 +1,30 @@
 void funnelNavigation(const SensorReading &sensors)
 {
-    const float DIST_TOLERANCE   = 900.0f;
-    const float FUNNEL_TOLERANCE = 100.0f;
-    const float LOW_SUM_LIMIT    = 300.0f;
-    const float EXIT_DELTA       = 1000.0f;
+    const float DIST_TOLERANCE       = 900.0f;
+    const float FUNNEL_TOLERANCE     = 100.0f;
+
+    const float LOW_SUM_LIMIT        = 300.0f;
+    const float EXIT_DELTA           = 1000.0f;
+
+    const float SIDE_SEEN_MM         = 1200.0f;
+
+    const float FRONT_CAUTION_MM     = 250.0f;
+    const float FRONT_DANGER_MM      = 100.0f;
 
     const unsigned long MAX_OPENING_TURN_MS = 2000UL;
 
     bool flag_low_sum = false;
 
-    float delta, sum, high_dist;
-
-    // State for handling a large opening on one side
     bool correctingLargeOpening = false;
     unsigned long correctionStartTime = 0;
 
-    int correctionDirection = 0;   // -1 for left, 1 for right
+    int correctionDirection = 0;
+    int lastTurnDirection = 1;
 
-    while (!flag_low_sum || abs(laserRightDistance - laserLeftDistance) <= EXIT_DELTA)
+    bool funnelComplete = false;
+
+    while (!funnelComplete)
     {
-        // ====================================================
-        // GET FRESH SENSOR DATA
-        // ====================================================
-
         readSensors(STAGE_FUNNEL);
 
         laserRightDistance = sensors.laserRight_mm;
@@ -30,41 +32,112 @@ void funnelNavigation(const SensorReading &sensors)
         laserFrontDistance = sensors.laserFront_mm;
 
 
+        // ----------------------------------------------------
+        // FRONT SENSOR IS REQUIRED
+        // ----------------------------------------------------
+
+        if (!sensors.laserFront_valid)
+        {
+            car.stop();
+            continue;
+        }
+
+
+        bool leftSeen =
+            sensors.laserLeft_valid &&
+            laserLeftDistance < SIDE_SEEN_MM;
+
+        bool rightSeen =
+            sensors.laserRight_valid &&
+            laserRightDistance < SIDE_SEEN_MM;
+
+
+        // ----------------------------------------------------
+        // CHOOSE TURN DIRECTION
+        // ----------------------------------------------------
+
+        int turnDirection = lastTurnDirection;
+
+        if (leftSeen && rightSeen)
+        {
+            turnDirection =
+                (laserRightDistance > laserLeftDistance)
+                ? 1
+                : -1;
+        }
+        else if (leftSeen && !rightSeen)
+        {
+            turnDirection = 1;
+        }
+        else if (!leftSeen && rightSeen)
+        {
+            turnDirection = -1;
+        }
+
+        lastTurnDirection = turnDirection;
+
+
         // ====================================================
-        // VALIDITY CHECK
+        // PRIORITY 1: FRONT COLLISION DANGER
         // ====================================================
 
-        if (!(sensors.laserLeft_valid &&
-              sensors.laserRight_valid &&
-              sensors.laserFront_valid))
+        if (laserFrontDistance < FRONT_DANGER_MM)
         {
-            // Do not continue driving blindly with bad data.
-            car.straight(slow);
+            correctingLargeOpening = false;
+
+            car.stop();
+
+            car.turn(turnDirection * fast);
+
+            delay(80);
+
             continue;
         }
 
 
         // ====================================================
-        // CALCULATE FUNNEL GEOMETRY
+        // PRIORITY 2: FRONT OBJECT APPROACHING
         // ====================================================
 
-        delta =
+        if (laserFrontDistance < FRONT_CAUTION_MM)
+        {
+            correctingLargeOpening = false;
+
+            car.turn(turnDirection * slow);
+
+            delay(50);
+
+            continue;
+        }
+
+
+        // ----------------------------------------------------
+        // SIDE GEOMETRY REQUIRES BOTH SIDE READINGS
+        // ----------------------------------------------------
+
+        if (!(leftSeen && rightSeen))
+        {
+            // Front is clear, but we cannot reliably center.
+            car.straight(slow);
+            continue;
+        }
+
+
+        float delta =
             laserRightDistance - laserLeftDistance;
 
-        sum =
+        float sum =
             laserRightDistance + laserLeftDistance;
 
-        high_dist =
+        float high_dist =
             max(laserRightDistance, laserLeftDistance);
 
-        // Positive delta:
-        // right side is farther away -> more room on right.
-        right_or_left =
+        int right_or_left =
             (delta > 0.0f) ? 1 : -1;
 
 
         // ====================================================
-        // STAGE EXIT DETECTION
+        // FUNNEL EXIT DETECTION
         // ====================================================
 
         if (sum < LOW_SUM_LIMIT)
@@ -72,51 +145,44 @@ void funnelNavigation(const SensorReading &sensors)
             flag_low_sum = true;
         }
 
-        // We first passed through a narrow section,
-        // and now one side suddenly opens significantly.
         if (flag_low_sum &&
             abs(delta) > EXIT_DELTA)
         {
+            funnelComplete = true;
             break;
         }
 
 
         // ====================================================
-        // CURRENTLY CORRECTING A LARGE OPENING
+        // LARGE-OPENING CORRECTION ALREADY ACTIVE
         // ====================================================
 
         if (correctingLargeOpening)
         {
-            digitalWrite(redLedPin, HIGH);
             bool openingClosed =
                 high_dist < DIST_TOLERANCE;
 
-            bool correctionTimedOut =
+            bool timedOut =
                 millis() - correctionStartTime >=
                 MAX_OPENING_TURN_MS;
 
-            if (openingClosed || correctionTimedOut)
+            if (openingClosed || timedOut)
             {
-                // Finished the special correction.
                 correctingLargeOpening = false;
 
                 car.straight(fast);
             }
             else
             {
-                // Keep turning in the SAME direction selected
-                // when the large opening was first detected.
                 car.turn(correctionDirection * slow);
             }
 
-            // Don't also execute normal funnel correction during
-            // this iteration.
             continue;
         }
 
 
         // ====================================================
-        // DETECT A LARGE OPENING
+        // NEW LARGE OPENING
         // ====================================================
 
         if (high_dist > DIST_TOLERANCE)
@@ -125,7 +191,6 @@ void funnelNavigation(const SensorReading &sensors)
 
             correctionStartTime = millis();
 
-            // Remember which side was open when correction began.
             correctionDirection = right_or_left;
 
             car.turn(correctionDirection * slow);
@@ -140,29 +205,13 @@ void funnelNavigation(const SensorReading &sensors)
 
         if (abs(delta) > FUNNEL_TOLERANCE)
         {
-            // Turn toward the side with more available space.
-            car.turn(right_or_left * delta/10.0f);
+            car.turn(right_or_left * slow);
         }
         else
         {
-            // Approximately equal distance from both walls.
             car.straight(fast);
         }
     }
 
-
-    // ========================================================
-    // FUNNEL FINISHED
-    // ========================================================
-
     car.stop();
-    // Blink white LED 3 times to indicate stage transition.
-    for (int i = 0; i < 3; i++)
-    {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(250);
-
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(250);
-    }
 }

@@ -1,91 +1,158 @@
 void openAreaNavigation(const SensorReading &sensors)
 {
-    bool isLeftFrontClose = false;
-    bool isRightFrontClose = false;0;   // -1 for left, 1 for right
+    const float SIDE_CLOSE_MM       = 500.0f;
+    const float SIDE_SEEN_MM        = 1200.0f;
 
-    while (!isLeftFrontClose && !isRightFrontClose)
+    const float FRONT_CAUTION_MM    = 300.0f;
+    const float FRONT_DANGER_MM     = 100.0f;
+
+    const uint8_t FUNNEL_CONFIRM_COUNT = 3;
+
+    uint8_t funnelConfirmCounter = 0;
+
+    // Remember last useful turn direction.
+    // +1 = right, -1 = left
+    int lastTurnDirection = 1;
+
+    bool openAreaComplete = false;
+
+    while (!openAreaComplete)
     {
-        /*delay(1000);
-        digitalWrite(LED_BUILTIN, LOW);
-        digitalWrite(whiteLedPin, LOW);
-        digitalWrite(redLedPin, LOW);
-        //digitalWrite(greenLedPin, LOW);
-        digitalWrite(greenLedPin, HIGH);*/
-
-        // Refresh sensor data.
-        // readSensors() updates currentData, which sensors references.
         readSensors(STAGE_OPEN_AREA);
 
         laserLeftDistance  = sensors.laserLeft_mm;
         laserRightDistance = sensors.laserRight_mm;
         laserFrontDistance = sensors.laserFront_mm;
 
-        Serial.print("laserLeftDistance: ");
-        Serial.println(laserLeftDistance);
+        // ----------------------------------------------------
+        // FRONT SENSOR IS MANDATORY
+        // ----------------------------------------------------
 
-        Serial.print("laserRightDistance: ");
-        Serial.println(laserRightDistance);
-
-        Serial.print("laserFrontDistance: ");
-        Serial.println(laserFrontDistance);
-
-        car.straight(fast);
-        //digitalWrite(LED_BUILTIN, HIGH);
-
-        isLeftFrontClose =
-            sensors.laserLeft_valid &&
-            laserLeftDistance < 500.0f;
-
-        isRightFrontClose =
-            sensors.laserRight_valid &&
-            laserRightDistance < 500.0f;
-
-        if ((isLeftFrontClose || isRightFrontClose) &&
-            sensors.laserFront_valid &&
-            laserFrontDistance < 300.0f)
+        if (!sensors.laserFront_valid)
         {
-            //digitalWrite(LED_BUILTIN, LOW);
-
-            if (isLeftFrontClose && !isRightFrontClose)
-            {
-                // Obstacle only on left -> go right
-                right_or_left = -1;
-            }
-            else if (isRightFrontClose && !isLeftFrontClose)
-            {
-                // Obstacle only on right -> go left
-                right_or_left = 1;
-            }
-            else
-            {
-                // Both sides are close.
-                // Turn toward the side with MORE free space.
-                right_or_left =
-                    (laserLeftDistance < laserRightDistance)
-                    ? 1     // left closer -> turn right
-                    : -1;   // right closer -> turn left
-            }
-            
             car.stop();
-            car.turn(right_or_left * fast);
+            continue;
+        }
 
-            /*if (right_or_left == 1)
+        bool leftSeen =
+            sensors.laserLeft_valid &&
+            laserLeftDistance < SIDE_SEEN_MM;
+
+        bool rightSeen =
+            sensors.laserRight_valid &&
+            laserRightDistance < SIDE_SEEN_MM;
+
+        bool leftClose =
+            leftSeen &&
+            laserLeftDistance < SIDE_CLOSE_MM;
+
+        bool rightClose =
+            rightSeen &&
+            laserRightDistance < SIDE_CLOSE_MM;
+
+
+        // ----------------------------------------------------
+        // CHOOSE SAFEST TURN DIRECTION
+        // ----------------------------------------------------
+
+        int turnDirection = lastTurnDirection;
+
+        if (leftSeen && rightSeen)
+        {
+            // Turn toward the side with more measured space.
+            turnDirection =
+                (laserRightDistance > laserLeftDistance)
+                ? 1
+                : -1;
+        }
+        else if (leftSeen && !rightSeen)
+        {
+            // Known wall on left -> turn right.
+            turnDirection = 1;
+        }
+        else if (!leftSeen && rightSeen)
+        {
+            // Known wall on right -> turn left.
+            turnDirection = -1;
+        }
+
+        lastTurnDirection = turnDirection;
+
+
+        // ====================================================
+        // PRIORITY 1: IMMEDIATE FRONT COLLISION AVOIDANCE
+        // ====================================================
+
+        if (laserFrontDistance < FRONT_DANGER_MM)
+        {
+            car.stop();
+
+            car.turn(turnDirection * fast);
+
+            // Short pulse, then immediately measure again.
+            delay(80);
+
+            continue;
+        }
+
+
+        // ====================================================
+        // PRIORITY 2: FRONT OBJECT APPROACHING
+        // ====================================================
+
+        if (laserFrontDistance < FRONT_CAUTION_MM)
+        {
+            // Don't continue straight at full speed.
+            car.turn(turnDirection * slow);
+
+            delay(50);
+
+            continue;
+        }
+
+
+        // ====================================================
+        // PRIORITY 3: FUNNEL ENTRY DETECTION
+        // ====================================================
+
+        if (leftClose &&
+            rightClose &&
+            laserFrontDistance > FRONT_CAUTION_MM)
+        {
+            funnelConfirmCounter++;
+
+            if (funnelConfirmCounter >= FUNNEL_CONFIRM_COUNT)
             {
-                digitalWrite(greenLedPin, HIGH);
+                openAreaComplete = true;
+                break;
             }
-            else
-            {
-                digitalWrite(redLedPin, HIGH);
-            }*/
+        }
+        else
+        {
+            funnelConfirmCounter = 0;
+        }
 
-            delay(500);
+
+        // ====================================================
+        // PRIORITY 4: SIDE CORRECTIONS
+        // ====================================================
+
+        if (leftClose && !rightClose)
+        {
+            car.turn(slow);       // right
+        }
+        else if (rightClose && !leftClose)
+        {
+            car.turn(-slow);      // left
+        }
+        else
+        {
+            car.straight(fast);
         }
     }
 
     car.stop();
-    //digitalWrite(LED_BUILTIN, LOW);
 
-    // Blink white LED 3 times to indicate stage transition.
     for (int i = 0; i < 3; i++)
     {
         digitalWrite(whiteLedPin, HIGH);

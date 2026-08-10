@@ -16,7 +16,7 @@ void setup()
     digitalWrite(redLedPin, LOW);
     digitalWrite(greenLedPin, LOW);
 
-    car.setBias(1);
+    car.setBias(1.1);
     car.attach(
         LEFT_DIR_1, LEFT_DIR_2, LEFT_PWM,
         RIGHT_DIR_1, RIGHT_DIR_2, RIGHT_PWM);
@@ -84,25 +84,4 @@ void loop()
             break;*/
     }
 
-    // --------------------------------------------------------
-    // YOUR IMPLEMENTATION GOES HERE.
-    // Examples below only demonstrate how to access data.
-    // They are not navigation logic.
-    // --------------------------------------------------------
-
-    /*if (sensors.US60_valid)
-    {
-        Serial.print("US60 [cm]: ");
-        Serial.println(sensors.US60_cm);
-    }*/
-
-    /*if (sensors.laserFront_valid)
-    {
-        Serial.print("Front laser [mm]: ");
-        Serial.println(sensors.laserFront_mm);
-    }*/
-
-    // Example of changing which sensor set will be acquired:
-    // currentStage = STAGE_WADI;
-    // currentStage = STAGE_LIGHT;
 }

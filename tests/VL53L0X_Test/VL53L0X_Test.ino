@@ -23,9 +23,9 @@ const uint8_t LASER_COUNT = 3;
 
 const uint8_t xshutPins[LASER_COUNT] =
 {
-    30,     // Laser 0
-    31,     // Laser 1
-    33      // Laser 2
+    30,     // Laser 0 - Left
+    31,     // Laser 1 - Right
+    33      // Laser 2 - front
 };
 
 uint8_t currentLaser = 0;
