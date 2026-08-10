@@ -4,7 +4,7 @@
 SteeringDualH::SteeringDualH()
 : _vel(0), _bias(0), _biasFactor(1.0)
 {
-  attach(7, 8, 9, 5, 4, 3);
+  attach(46, 48, 44, 49, 47, 45);
 }
 
 void SteeringDualH::attach(int leftDirPin1,  int leftDirPin2,  int leftPwmPin,  
