@@ -422,7 +422,7 @@ void clearSensorReading(SensorReading &data)
     data.accelY_g = NAN;
     data.accelZ_g = NAN;
 }
-const SensorReading& readSensors(uint8_t stage);
+
 // ============================================================
 // MAIN SENSOR ENTRY POINT
 // ============================================================
