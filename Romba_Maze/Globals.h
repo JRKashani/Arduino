@@ -5,6 +5,10 @@
 #include <SteeringDualH.h>
 #include <VL53L0X.h>
 
+// ============================================================
+// SENSOR DATA
+// ============================================================
+
 struct SensorReading
 {
     uint32_t timestamp;
@@ -12,12 +16,10 @@ struct SensorReading
     // HC-SR04: centimetres
     float US60_cm;
     float US120_cm;
-    float US240_cm;
     float US300_cm;
 
     bool US60_valid;
     bool US120_valid;
-    bool US240_valid;
     bool US300_valid;
 
     // VL53L0X: millimetres
@@ -27,8 +29,11 @@ struct SensorReading
     bool laserFront_valid;
     bool laserRight_valid;
 
-    // Sharp GP2Y0A21YK
-    // Keep both raw ADC and approximate distance.
+    // --------------------------------------------------------
+    // Sharp GP2Y0A21YK IR sensors - NOT CURRENTLY USED.
+    // Kept here commented out so they can be restored later.
+    // --------------------------------------------------------
+    /*
     float IRLeft_adc;
     float IRRight_adc;
 
@@ -37,12 +42,15 @@ struct SensorReading
 
     bool IRLeft_valid;
     bool IRRight_valid;
+    */
 
-    // LDR: raw ADC only
+    // LDR: raw ADC
     float photoLeft_adc;
     float photoRight_adc;
 
     // ADXL335: acceleration in g
+    // Conversion currently uses provisional calibration values
+    // in Sensors.cpp. Recalibrate on the actual robot later.
     float accelX_g;
     float accelY_g;
     float accelZ_g;
@@ -50,14 +58,6 @@ struct SensorReading
 
 extern SensorReading currentData;
 
-extern Ultrasonic US60_cm;
-extern Ultrasonic US120_cm;
-extern Ultrasonic US240_cm;
-extern Ultrasonic US300_cm;
-
-extern const int redLedPin;
-extern const int greenLedPin;
-extern const int whiteLedPin;
 
 // ============================================================
 // STAGES
@@ -72,19 +72,6 @@ enum RobotStage : uint8_t
     STAGE_LIGHT = 5
 };
 
-/*
-extern const int trigPin60;
-extern const int echoPin60;
-
-extern const int trigPin120;
-extern const int echoPin120;
-
-extern const int trigPin240;
-extern const int echoPin240;
-
-extern const int trigPin300;
-extern const int echoPin300;
-*/
 
 // ============================================================
 // MOTOR PINS
@@ -109,30 +96,34 @@ extern const uint8_t US60_ECHO_PIN;
 extern const uint8_t US120_TRIG_PIN;
 extern const uint8_t US120_ECHO_PIN;
 
-extern const uint8_t US240_TRIG_PIN;
-extern const uint8_t US240_ECHO_PIN;
-
 extern const uint8_t US300_TRIG_PIN;
 extern const uint8_t US300_ECHO_PIN;
+
+extern Ultrasonic US60;
+extern Ultrasonic US120;
+extern Ultrasonic US300;
 
 
 // ============================================================
 // VL53L0X
-// Mega hardware I2C:
-// SDA = 20
-// SCL = 21
+// Mega hardware I2C: SDA = 20, SCL = 21
 // ============================================================
 
-extern const uint8_t LASER_LEFT_XSHUT_PIN;
+extern const uint8_t LASER_FRONT_XSHUT_PIN;
 extern const uint8_t LASER_RIGHT_XSHUT_PIN;
 
+extern VL53L0X laserFront;
+extern VL53L0X laserRight;
+
 
 // ============================================================
-// SHARP IR
+// SHARP IR - NOT CURRENTLY USED
 // ============================================================
 
+/*
 extern const uint8_t IR_LEFT_PIN;
 extern const uint8_t IR_RIGHT_PIN;
+*/
 
 
 // ============================================================
@@ -153,23 +144,10 @@ extern const uint8_t ACCEL_Z_PIN;
 
 
 // ============================================================
-// BUTTON
+// OTHER PROJECT GLOBALS
 // ============================================================
 
-extern const uint8_t BUTTON_PIN;
-
-extern VL53L0X laserFront_mm;
-extern VL53L0X laserRight_mm;
-
-extern const uint8_t IRLeftPin;
-extern const uint8_t IRRightPin;
-
-extern const uint8_t photoLeftPin;
-extern const uint8_t photoRightPin;
-
-extern const uint8_t accelXPin;
-extern const uint8_t accelYPin;
-extern const uint8_t accelZPin;
+extern const int whiteLedPin;
 
 extern SteeringDualH car;
 
@@ -183,3 +161,7 @@ extern float K;
 
 extern const int targetDistanceWall;
 extern const int targetDistanceLight;
+
+// NOTE: the old BUTTON_PIN was pin 2, which conflicts with
+// US60_TRIG_PIN = 2. Define a new button pin only after choosing
+// a non-conflicting physical pin.

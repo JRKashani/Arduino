@@ -1,19 +1,23 @@
 #include "Sensors.h"
+
+#include <Wire.h>
 #include <math.h>
 
 
 // ============================================================
-// FILTER SETTINGS
+// SETTINGS
 // ============================================================
 
-const uint8_t DISTANCE_AVERAGE_COUNT = 3;
+static const uint8_t DISTANCE_AVERAGE_COUNT = 3;
+static const unsigned long ANALOG_WINDOW_US = 10000UL;
+static const uint16_t LASER_TIMEOUT_MS = 50;
 
-const unsigned long ANALOG_WINDOW_US = 10000UL;
+static const uint8_t LASER_FRONT_ADDRESS = 0x30;
+static const uint8_t LASER_RIGHT_ADDRESS = 0x31;
 
 
 // ============================================================
 // SIMPLE 3-SAMPLE ROLLING AVERAGE
-// Used for HC-SR04 and VL53L0X.
 // ============================================================
 
 struct RollingAverage3
@@ -23,26 +27,19 @@ struct RollingAverage3
     uint8_t next;
 };
 
+static RollingAverage3 US60Filter  = {{0}, 0, 0};
+static RollingAverage3 US120Filter = {{0}, 0, 0};
+static RollingAverage3 US300Filter = {{0}, 0, 0};
 
-RollingAverage3 US60Filter  = {{0}, 0, 0};
-RollingAverage3 US120Filter = {{0}, 0, 0};
-RollingAverage3 US240Filter = {{0}, 0, 0};
-RollingAverage3 US300Filter = {{0}, 0, 0};
-
-RollingAverage3 laserLeftFilter  = {{0}, 0, 0};
-RollingAverage3 laserRightFilter = {{0}, 0, 0};
+static RollingAverage3 laserFrontFilter = {{0}, 0, 0};
+static RollingAverage3 laserRightFilter = {{0}, 0, 0};
 
 
-// ============================================================
-// ROLLING-AVERAGE HELPERS
-// ============================================================
-
-void addReading(RollingAverage3 &filter, float value)
+static void addReading(RollingAverage3 &filter, float value)
 {
     filter.values[filter.next] = value;
 
     filter.next++;
-
     if (filter.next >= DISTANCE_AVERAGE_COUNT)
         filter.next = 0;
 
@@ -51,7 +48,7 @@ void addReading(RollingAverage3 &filter, float value)
 }
 
 
-float getAverage(const RollingAverage3 &filter)
+static float getAverage(const RollingAverage3 &filter)
 {
     if (filter.count == 0)
         return NAN;
@@ -61,7 +58,7 @@ float getAverage(const RollingAverage3 &filter)
     for (uint8_t i = 0; i < filter.count; i++)
         sum += filter.values[i];
 
-    return sum / filter.count;
+    return sum / (float)filter.count;
 }
 
 
@@ -69,27 +66,39 @@ float getAverage(const RollingAverage3 &filter)
 // HC-SR04
 // ============================================================
 
-float readUltrasonic(
+static float readUltrasonic(
     Ultrasonic &sensor,
     RollingAverage3 &filter,
     bool &valid)
 {
-    long distance_cm = sensor.ranging(CM);
+    const long distance_cm = sensor.ranging(CM);
 
-    // Library returns 0 when pulseIn() times out.
+    // In the supplied Ultrasonic library, zero means timeout /
+    // no valid echo. Do not insert it into the filter.
     if (distance_cm <= 0)
     {
         valid = false;
-
-        // Do NOT insert zero into the moving average.
         return NAN;
     }
 
     valid = true;
-
     addReading(filter, (float)distance_cm);
-
     return getAverage(filter);
+}
+
+
+void readUltrasonics(SensorReading &data)
+{
+    // Sequential reads avoid intentionally firing the ultrasonic
+    // sensors at the same time.
+    data.US60_cm = readUltrasonic(
+        US60, US60Filter, data.US60_valid);
+
+    data.US120_cm = readUltrasonic(
+        US120, US120Filter, data.US120_valid);
+
+    data.US300_cm = readUltrasonic(
+        US300, US300Filter, data.US300_valid);
 }
 
 
@@ -97,41 +106,186 @@ float readUltrasonic(
 // VL53L0X
 // ============================================================
 
-float readLaser(
+static void holdLaserInShutdown(uint8_t xshutPin)
+{
+    pinMode(xshutPin, OUTPUT);
+    digitalWrite(xshutPin, LOW);
+}
+
+
+static void releaseLaserFromShutdown(uint8_t xshutPin)
+{
+    // Pololu #2490 XSHUT is pulled up on the carrier and is not
+    // 5 V tolerant. On a Mega, release it to high impedance
+    // instead of actively driving it HIGH.
+    pinMode(xshutPin, INPUT);
+}
+
+
+/*bool setupSensors()
+{
+    
+    Wire.begin();
+
+    // Both sensors start at 0x29, so keep both disabled first.
+    holdLaserInShutdown(LASER_FRONT_XSHUT_PIN);
+    holdLaserInShutdown(LASER_RIGHT_XSHUT_PIN);
+    delay(10);
+
+    // Front laser: enable alone, initialize, assign unique address.
+    releaseLaserFromShutdown(LASER_FRONT_XSHUT_PIN);
+    delay(10);
+
+    laserFront.setTimeout(LASER_TIMEOUT_MS);
+    if (!laserFront.init())
+        return false;
+
+    laserFront.setAddress(LASER_FRONT_ADDRESS);
+
+    // Right laser: now enable it and assign another unique address.
+    releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
+    delay(10);
+
+    laserRight.setTimeout(LASER_TIMEOUT_MS);
+    if (!laserRight.init())
+        return false;
+
+    laserRight.setAddress(LASER_RIGHT_ADDRESS);
+
+    // Continuous ranging lets loop() read the latest measurement
+    // without starting a new single-shot measurement each time.
+    laserFront.startContinuous();
+    laserRight.startContinuous();
+
+    return true;
+    */
+   bool setupSensors()
+{
+    Serial.println("=== VL53L0X setup ===");
+
+    Wire.begin();
+
+    // --------------------------------------------------------
+    // 1. Shut down both lasers
+    // --------------------------------------------------------
+    Serial.println("Shutting down both lasers");
+
+    holdLaserInShutdown(LASER_FRONT_XSHUT_PIN);
+    holdLaserInShutdown(LASER_RIGHT_XSHUT_PIN);
+
+    delay(50);
+
+    // --------------------------------------------------------
+    // 2. Start FRONT only
+    // --------------------------------------------------------
+    Serial.println("Releasing FRONT laser");
+
+    releaseLaserFromShutdown(LASER_FRONT_XSHUT_PIN);
+    delay(50);
+
+    Serial.println("Initializing FRONT at 0x29...");
+
+    if (!laserFront.init())
+    {
+        Serial.println("ERROR: FRONT laser init failed");
+        return false;
+    }
+
+    Serial.println("FRONT initialized");
+
+    laserFront.setTimeout(LASER_TIMEOUT_MS);
+
+    Serial.print("Changing FRONT address to 0x");
+    Serial.println(LASER_FRONT_ADDRESS, HEX);
+
+    laserFront.setAddress(LASER_FRONT_ADDRESS);
+
+    delay(20);
+
+    // --------------------------------------------------------
+    // 3. Start RIGHT
+    // --------------------------------------------------------
+    Serial.println("Releasing RIGHT laser");
+
+    releaseLaserFromShutdown(LASER_RIGHT_XSHUT_PIN);
+    delay(50);
+
+    Serial.println("Initializing RIGHT at 0x29...");
+
+    if (!laserRight.init())
+    {
+        Serial.println("ERROR: RIGHT laser init failed");
+        return false;
+    }
+
+    Serial.println("RIGHT initialized");
+
+    laserRight.setTimeout(LASER_TIMEOUT_MS);
+
+    Serial.print("Changing RIGHT address to 0x");
+    Serial.println(LASER_RIGHT_ADDRESS, HEX);
+
+    laserRight.setAddress(LASER_RIGHT_ADDRESS);
+
+    delay(20);
+
+    // --------------------------------------------------------
+    // 4. Start continuous mode
+    // --------------------------------------------------------
+    Serial.println("Starting continuous mode");
+
+    laserFront.startContinuous();
+    laserRight.startContinuous();
+
+    Serial.println("=== VL53L0X setup successful ===");
+
+    return true;
+}
+//}
+
+
+static float readLaser(
     VL53L0X &sensor,
     RollingAverage3 &filter,
     bool &valid)
 {
-    uint16_t distance_mm =
+    const uint16_t distance_mm =
         sensor.readRangeContinuousMillimeters();
 
-    bool timedOut = sensor.timeoutOccurred();
+    const bool timedOut = sensor.timeoutOccurred();
 
-    if (timedOut || distance_mm == 65535)
+    if (timedOut || distance_mm == 65535U)
     {
         valid = false;
-
-        // Again: do not contaminate the average with the
-        // timeout value.
         return NAN;
     }
 
     valid = true;
-
     addReading(filter, (float)distance_mm);
-
     return getAverage(filter);
 }
 
 
+void readLasers(SensorReading &data)
+{
+    data.laserFront_mm = readLaser(
+        laserFront,
+        laserFrontFilter,
+        data.laserFront_valid);
+
+    data.laserRight_mm = readLaser(
+        laserRight,
+        laserRightFilter,
+        data.laserRight_valid);
+}
+
+
 // ============================================================
-// SHARP GP2Y0A21YK
-//
-// This conversion is only an approximation.
-// We should replace it with calibration data later.
+// SHARP GP2Y0A21YK IR - NOT CURRENTLY USED
 // ============================================================
 
-float sharpDistanceCm(float adc)
+/*
+static float sharpDistanceCm(float adc)
 {
     float voltage = adc * 5.0f / 1023.0f;
 
@@ -140,201 +294,124 @@ float sharpDistanceCm(float adc)
 
     float distance_cm = 27.0f / voltage;
 
-    // Nominal useful range of the GP2Y0A21YK.
     if (distance_cm < 10.0f || distance_cm > 80.0f)
         return NAN;
 
     return distance_cm;
 }
 
+static void readInfraredSensors(SensorReading &data)
+{
+    // This block is intentionally disabled for the current build.
+    // Re-enable only after the IR hardware returns to the robot.
+}
+*/
+
 
 // ============================================================
 // ADXL335
-//
-// Initial nominal calibration.
-// Assumptions:
-//   ADXL335 powered at 3.3 V
-//   Mega ADC reference = 5 V
-//
-// These MUST eventually be replaced with measured calibration.
 // ============================================================
 
-const float ADXL_ZERO_X = 337.5f;
-const float ADXL_ZERO_Y = 337.5f;
-const float ADXL_ZERO_Z = 337.5f;
+// These are the provisional values already used in the project.
+// They are NOT final calibration values.
+static const float ADXL_ZERO_X = 337.5f;
+static const float ADXL_ZERO_Y = 337.5f;
+static const float ADXL_ZERO_Z = 337.5f;
+static const float ADXL_COUNTS_PER_G = 67.5f;
 
-const float ADXL_COUNTS_PER_G = 67.5f;
 
-
-float adxlToG(float adc, float zero)
+static float adxlToG(float adc, float zero)
 {
     return (adc - zero) / ADXL_COUNTS_PER_G;
 }
 
 
-// ============================================================
-// 10 ms WADI ANALOG WINDOW
-//
-// Samples:
-//   IR left
-//   IR right
-//   accel X
-//   accel Y
-//   accel Z
-//
-// repeatedly for approximately 10 ms.
-// ============================================================
-
-void readWadiAnalog(SensorReading &data)
+void readAccelerometer(SensorReading &data)
 {
-    uint32_t sumIRLeft  = 0;
-    uint32_t sumIRRight = 0;
-
     uint32_t sumX = 0;
     uint32_t sumY = 0;
     uint32_t sumZ = 0;
-
     uint16_t samples = 0;
 
-    unsigned long start_us = micros();
+    const unsigned long start_us = micros();
 
     do
     {
-        sumIRLeft  += analogRead(IRLeftPin);
-        sumIRRight += analogRead(IRRightPin);
-
-        sumX += analogRead(accelXPin);
-        sumY += analogRead(accelYPin);
-        sumZ += analogRead(accelZPin);
-
+        sumX += analogRead(ACCEL_X_PIN);
+        sumY += analogRead(ACCEL_Y_PIN);
+        sumZ += analogRead(ACCEL_Z_PIN);
         samples++;
     }
     while ((micros() - start_us) < ANALOG_WINDOW_US);
 
+    const float xAverage = (float)sumX / (float)samples;
+    const float yAverage = (float)sumY / (float)samples;
+    const float zAverage = (float)sumZ / (float)samples;
 
-    float irLeftAverage =
-        (float)sumIRLeft / samples;
-
-    float irRightAverage =
-        (float)sumIRRight / samples;
-
-    float xAverage =
-        (float)sumX / samples;
-
-    float yAverage =
-        (float)sumY / samples;
-
-    float zAverage =
-        (float)sumZ / samples;
-
-
-    // Raw IR averages
-    data.IRLeft_adc  = irLeftAverage;
-    data.IRRight_adc = irRightAverage;
-
-
-    // Approximate converted distances
-    data.IRLeft_cm  =
-        sharpDistanceCm(irLeftAverage);
-
-    data.IRRight_cm =
-        sharpDistanceCm(irRightAverage);
-
-
-    data.IRLeft_valid =
-        !isnan(data.IRLeft_cm);
-
-    data.IRRight_valid =
-        !isnan(data.IRRight_cm);
-
-
-    // Accelerations
-    data.accelX_g =
-        adxlToG(xAverage, ADXL_ZERO_X);
-
-    data.accelY_g =
-        adxlToG(yAverage, ADXL_ZERO_Y);
-
-    data.accelZ_g =
-        adxlToG(zAverage, ADXL_ZERO_Z);
+    data.accelX_g = adxlToG(xAverage, ADXL_ZERO_X);
+    data.accelY_g = adxlToG(yAverage, ADXL_ZERO_Y);
+    data.accelZ_g = adxlToG(zAverage, ADXL_ZERO_Z);
 }
 
 
 // ============================================================
-// 10 ms LIGHT-SENSOR WINDOW
+// LDR
 // ============================================================
 
 void readLightSensors(SensorReading &data)
 {
-    uint32_t sumLeft  = 0;
+    uint32_t sumLeft = 0;
     uint32_t sumRight = 0;
-
     uint16_t samples = 0;
 
-    unsigned long start_us = micros();
+    const unsigned long start_us = micros();
 
     do
     {
-        sumLeft += analogRead(photoLeftPin);
-        sumRight += analogRead(photoRightPin);
-
+        sumLeft += analogRead(LDR_LEFT_PIN);
+        sumRight += analogRead(LDR_RIGHT_PIN);
         samples++;
     }
     while ((micros() - start_us) < ANALOG_WINDOW_US);
 
-
-    data.photoLeft_adc =
-        (float)sumLeft / samples;
-
-    data.photoRight_adc =
-        (float)sumRight / samples;
+    data.photoLeft_adc = (float)sumLeft / (float)samples;
+    data.photoRight_adc = (float)sumRight / (float)samples;
 }
 
 
 // ============================================================
-// CLEAR UNUSED VALUES
-//
-// This is important.
-//
-// If we move from stage 2 to stage 4, we do not want an old
-// ultrasonic value sitting in currentData and looking current.
+// CLEAR DATA BEFORE EACH ACQUISITION PASS
 // ============================================================
 
 void clearSensorReading(SensorReading &data)
 {
     data.timestamp = millis();
 
-    data.US60_cm  = NAN;
+    data.US60_cm = NAN;
     data.US120_cm = NAN;
-    data.US240_cm = NAN;
     data.US300_cm = NAN;
 
-    data.US60_valid  = false;
+    data.US60_valid = false;
     data.US120_valid = false;
-    data.US240_valid = false;
     data.US300_valid = false;
 
-
-    data.laserFront_mm  = NAN;
+    data.laserFront_mm = NAN;
     data.laserRight_mm = NAN;
 
-    data.laserFront_valid  = false;
+    data.laserFront_valid = false;
     data.laserRight_valid = false;
 
-
-    data.IRLeft_adc  = NAN;
+    /*
+    data.IRLeft_adc = NAN;
     data.IRRight_adc = NAN;
-
-    data.IRLeft_cm  = NAN;
+    data.IRLeft_cm = NAN;
     data.IRRight_cm = NAN;
-
-    data.IRLeft_valid  = false;
+    data.IRLeft_valid = false;
     data.IRRight_valid = false;
+    */
 
-
-    data.photoLeft_adc  = NAN;
+    data.photoLeft_adc = NAN;
     data.photoRight_adc = NAN;
-
 
     data.accelX_g = NAN;
     data.accelY_g = NAN;
@@ -343,117 +420,38 @@ void clearSensorReading(SensorReading &data)
 
 
 // ============================================================
-// MAIN SENSOR FUNCTION
+// MAIN SENSOR ENTRY POINT
 // ============================================================
 
 const SensorReading& readSensors(uint8_t stage)
 {
     clearSensorReading(currentData);
 
-
     switch (stage)
     {
-        // ----------------------------------------------------
-        // STAGES 1-3
-        //
-        // For now acquire all ultrasonic sensors.
-        // We can reduce the set later once the exact control
-        // logic for each stage is fixed.
-        // ----------------------------------------------------
-
-        case 1:
-        case 2:
-        case 3:
-
-            currentData.US60_cm =
-                readUltrasonic(
-                    US60_cm,
-                    US60Filter,
-                    currentData.US60_valid);
-
-            currentData.US120_cm =
-                readUltrasonic(
-                    US120_cm,
-                    US120Filter,
-                    currentData.US120_valid);
-
-            currentData.US240_cm =
-                readUltrasonic(
-                    US240_cm,
-                    US240Filter,
-                    currentData.US240_valid);
-
-            currentData.US300_cm =
-                readUltrasonic(
-                    US300_cm,
-                    US300Filter,
-                    currentData.US300_valid);
-
+        case STAGE_OPEN_AREA:
+        case STAGE_FUNNEL:
+        case STAGE_WALL_FOLLOWING:
+            // Starter acquisition set only. No navigation logic here.
+            readUltrasonics(currentData);
+            readLasers(currentData);
             break;
 
-
-        // ----------------------------------------------------
-        // STAGE 4 - WADI
-        //
-        // 3 accelerometer axes
-        // 2 Sharp IR sensors
-        // 2 VL53L0X sensors
-        // ----------------------------------------------------
-
-        case 4:
-
-            readWadiAnalog(currentData);
-
-            currentData.laserFront_mm =
-                readLaser(
-                    laserFront_mm,
-                    laserFrontFilter,
-                    currentData.laserFront_valid);
-
-            currentData.laserRight_mm =
-                readLaser(
-                    laserRight_mm,
-                    laserRightFilter,
-                    currentData.laserRight_valid);
-
+        case STAGE_WADI:
+            readLasers(currentData);
+            readAccelerometer(currentData);
             break;
 
-
-        // ----------------------------------------------------
-        // STAGE 5 - LIGHT
-        //
-        // LDR pair for steering toward light.
-        // VL53L0X pair for final stopping distance.
-        // ----------------------------------------------------
-
-        case 5:
-
+        case STAGE_LIGHT:
+            readLasers(currentData);
             readLightSensors(currentData);
-
-            currentData.laserFront_mm =
-                readLaser(
-                    laserFront_mm,
-                    laserFrontFilter,
-                    currentData.laserFront_valid);
-
-            currentData.laserRight_mm =
-                readLaser(
-                    laserRight_mm,
-                    laserRightFilter,
-                    currentData.laserRight_valid);
-
             break;
-
 
         default:
-
-            // Invalid stage.
-            // currentData remains entirely invalid/NAN.
+            // Unknown stage: data remains invalid/NAN.
             break;
     }
 
-
     currentData.timestamp = millis();
-
     return currentData;
 }

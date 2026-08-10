@@ -17,7 +17,7 @@
   Requires:
     Pololu VL53L0X Arduino library
 */
-
+/*
 #include <Wire.h>
 #include <VL53L0X.h>
 
@@ -63,4 +63,50 @@ void loop()
     Serial.print(distanceMm);
     Serial.println(" mm");
   }
+}*/
+
+#include <Wire.h>
+#include <VL53L0X.h>
+
+VL53L0X sensor;
+
+void setup()
+{
+    Serial.begin(9600);
+    delay(1000);
+
+    Wire.begin();
+
+    Serial.println("Starting VL53L0X test...");
+
+    sensor.setTimeout(500);
+
+    Serial.println("Calling sensor.init()...");
+
+    if (!sensor.init())
+    {
+        Serial.println("INIT FAILED");
+    }
+    else
+    {
+        Serial.println("INIT SUCCESS");
+
+        sensor.startContinuous(100);
+    }
+}
+
+void loop()
+{
+    uint16_t distance = sensor.readRangeContinuousMillimeters();
+
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" mm");
+
+    if (sensor.timeoutOccurred())
+    {
+        Serial.println("TIMEOUT");
+    }
+
+    delay(100);
 }
