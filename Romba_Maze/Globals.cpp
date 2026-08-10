@@ -17,17 +17,17 @@ const uint8_t RIGHT_PWM   = 45;
 // HC-SR04 ULTRASONIC SENSORS
 // ============================================================
 
-const uint8_t US60_TRIG_PIN  = 22;
-const uint8_t US60_ECHO_PIN  = 23;
+const uint8_t US60_TRIG_PIN  = 2;
+const uint8_t US60_ECHO_PIN  = 3;
 
-const uint8_t US120_TRIG_PIN = 24;
-const uint8_t US120_ECHO_PIN = 25;
+const uint8_t US120_TRIG_PIN = 4;
+const uint8_t US120_ECHO_PIN = 5;
 
-const uint8_t US240_TRIG_PIN = 26;
-const uint8_t US240_ECHO_PIN = 27;
+const uint8_t US240_TRIG_PIN = 10;
+const uint8_t US240_ECHO_PIN = 11;
 
-const uint8_t US300_TRIG_PIN = 28;
-const uint8_t US300_ECHO_PIN = 29;
+const uint8_t US300_TRIG_PIN = 9;
+const uint8_t US300_ECHO_PIN = 8;
 
 
 // ============================================================
@@ -37,33 +37,33 @@ const uint8_t US300_ECHO_PIN = 29;
 // SCL = 21
 // ============================================================
 
-const uint8_t LASER_LEFT_XSHUT_PIN  = 30;
+const uint8_t LASER_FRONT_XSHUT_PIN  = 30;
 const uint8_t LASER_RIGHT_XSHUT_PIN = 31;
 
 
 // ============================================================
 // SHARP IR
 // ============================================================
-
+/*
 const uint8_t IR_LEFT_PIN  = A0;
 const uint8_t IR_RIGHT_PIN = A1;
-
+*/
 
 // ============================================================
 // LDR
 // ============================================================
 
-const uint8_t LDR_LEFT_PIN  = A2;
-const uint8_t LDR_RIGHT_PIN = A3;
+const uint8_t LDR_LEFT_PIN  = A7;
+const uint8_t LDR_RIGHT_PIN = A6;
 
 
 // ============================================================
 // ADXL335
 // ============================================================
 
-const uint8_t ACCEL_X_PIN = A4;
-const uint8_t ACCEL_Y_PIN = A5;
-const uint8_t ACCEL_Z_PIN = A6;
+const uint8_t ACCEL_X_PIN = A0;
+const uint8_t ACCEL_Y_PIN = A1;
+const uint8_t ACCEL_Z_PIN = A2;
 
 
 // ============================================================
@@ -71,10 +71,11 @@ const uint8_t ACCEL_Z_PIN = A6;
 // ============================================================
 
 const uint8_t BUTTON_PIN = 2;
-
+/*
   const int redLedPin   =  11;
   const int greenLedPin =  10;
-/*
+
+
   const int trigPin60   =  13;
   const int echoPin60   =  12;
 
@@ -105,5 +106,8 @@ const uint8_t BUTTON_PIN = 2;
   int tolerance_US            = 30;
   int tolerance_PhotoResistor = 80;
   float K = 1;
+
+  const int targetDistanceWall = 30;
+  int targetDistanceLight = 12;
 
   SensorReading currentData;

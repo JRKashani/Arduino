@@ -22,7 +22,7 @@
   This is NOT a lux measurement.
 */
 
-const uint8_t LDR_PIN = A0;
+const uint8_t LDR_PIN = A7;
 
 void setup()
 {
