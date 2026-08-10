@@ -1,153 +1,33 @@
 void openAreaNavigation(const SensorReading &sensors)
 {
-    const float SIDE_CLOSE_MM       = 500.0f;
-    const float SIDE_SEEN_MM        = 1200.0f;
+    const unsigned long OPEN_AREA_DRIVE_TIME_MS = 5000;  // CALIBRATE
+    const int FRONT_STOP_DISTANCE_MM = 120;              // safety only
 
-    const float FRONT_CAUTION_MM    = 300.0f;
-    const float FRONT_DANGER_MM     = 100.0f;
+    unsigned long startTime = millis();
 
-    const uint8_t FUNNEL_CONFIRM_COUNT = 3;
+    // Robot is assumed to already point toward the center of the funnel.
+    car.straight(veryFast);
 
-    uint8_t funnelConfirmCounter = 0;
-
-    // Remember last useful turn direction.
-    // +1 = right, -1 = left
-    int lastTurnDirection = 1;
-
-    bool openAreaComplete = false;
-
-    while (!openAreaComplete)
+    while (millis() - startTime < OPEN_AREA_DRIVE_TIME_MS)
     {
         readSensors(STAGE_OPEN_AREA);
 
-        laserLeftDistance  = sensors.laserLeft_mm;
-        laserRightDistance = sensors.laserRight_mm;
         laserFrontDistance = sensors.laserFront_mm;
 
-        // ----------------------------------------------------
-        // FRONT SENSOR IS MANDATORY
-        // ----------------------------------------------------
-
-        if (!sensors.laserFront_valid)
+        // Emergency protection only.
+        if (laserFrontDistance > 0 &&
+            laserFrontDistance < FRONT_STOP_DISTANCE_MM)
         {
+
             car.stop();
-            continue;
-        }
+            laserRightDistance = sensors.laserRight_mm;
+            laserLeftDistance  = sensors.laserLeft_mm;
+            right_or_left = (laserRightDistance > laserLeftDistance) ? 1 : -1;
+            car.turn(fast * right_or_left);  // turn away from obstacle
+            delay(1000);
 
-        bool leftSeen =
-            sensors.laserLeft_valid &&
-            laserLeftDistance < SIDE_SEEN_MM;
-
-        bool rightSeen =
-            sensors.laserRight_valid &&
-            laserRightDistance < SIDE_SEEN_MM;
-
-        bool leftClose =
-            leftSeen &&
-            laserLeftDistance < SIDE_CLOSE_MM;
-
-        bool rightClose =
-            rightSeen &&
-            laserRightDistance < SIDE_CLOSE_MM;
-
-
-        // ----------------------------------------------------
-        // CHOOSE SAFEST TURN DIRECTION
-        // ----------------------------------------------------
-
-        int turnDirection = lastTurnDirection;
-
-        if (leftSeen && rightSeen)
-        {
-            // Turn toward the side with more measured space.
-            turnDirection =
-                (laserRightDistance > laserLeftDistance)
-                ? 1
-                : -1;
-        }
-        else if (leftSeen && !rightSeen)
-        {
-            // Known wall on left -> turn right.
-            turnDirection = 1;
-        }
-        else if (!leftSeen && rightSeen)
-        {
-            // Known wall on right -> turn left.
-            turnDirection = -1;
-        }
-
-        lastTurnDirection = turnDirection;
-
-
-        // ====================================================
-        // PRIORITY 1: IMMEDIATE FRONT COLLISION AVOIDANCE
-        // ====================================================
-
-        if (laserFrontDistance < FRONT_DANGER_MM)
-        {
-            car.stop();
-
-            car.turn(turnDirection * fast);
-
-            // Short pulse, then immediately measure again.
-            delay(80);
-
-            continue;
-        }
-
-
-        // ====================================================
-        // PRIORITY 2: FRONT OBJECT APPROACHING
-        // ====================================================
-
-        if (laserFrontDistance < FRONT_CAUTION_MM)
-        {
-            // Don't continue straight at full speed.
-            car.turn(turnDirection * slow);
-
-            delay(50);
-
-            continue;
-        }
-
-
-        // ====================================================
-        // PRIORITY 3: FUNNEL ENTRY DETECTION
-        // ====================================================
-
-        if (leftClose &&
-            rightClose &&
-            laserFrontDistance > FRONT_CAUTION_MM)
-        {
-            funnelConfirmCounter++;
-
-            if (funnelConfirmCounter >= FUNNEL_CONFIRM_COUNT)
-            {
-                openAreaComplete = true;
-                break;
-            }
-        }
-        else
-        {
-            funnelConfirmCounter = 0;
-        }
-
-
-        // ====================================================
-        // PRIORITY 4: SIDE CORRECTIONS
-        // ====================================================
-
-        if (leftClose && !rightClose)
-        {
-            car.turn(slow);       // right
-        }
-        else if (rightClose && !leftClose)
-        {
-            car.turn(-slow);      // left
-        }
-        else
-        {
-            car.straight(fast);
+            //Serial.println("OPEN AREA: obstacle detected ahead");
+            return;
         }
     }
 
@@ -161,4 +41,6 @@ void openAreaNavigation(const SensorReading &sensors)
         digitalWrite(whiteLedPin, LOW);
         delay(250);
     }
+
+    //Serial.println("OPEN AREA COMPLETE");
 }

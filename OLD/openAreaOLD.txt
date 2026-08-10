@@ -98,3 +98,168 @@ void openAreaNavigation(const SensorReading &sensors)
         delay(250);
     }
 }
+
+void openAreaNavigation(const SensorReading &sensors)
+{
+    const float SIDE_CLOSE_MM       = 500.0f;
+    const float SIDE_SEEN_MM        = 1200.0f;
+
+    const float FRONT_CAUTION_MM    = 300.0f;
+    const float FRONT_DANGER_MM     = 100.0f;
+
+    const uint8_t FUNNEL_CONFIRM_COUNT = 3;
+
+    uint8_t funnelConfirmCounter = 0;
+
+    // Remember last useful turn direction.
+    // +1 = right, -1 = left
+    int lastTurnDirection = 1;
+
+    bool openAreaComplete = false;
+
+    while (!openAreaComplete)
+    {
+        readSensors(STAGE_OPEN_AREA);
+
+        laserLeftDistance  = sensors.laserLeft_mm;
+        laserRightDistance = sensors.laserRight_mm;
+        laserFrontDistance = sensors.laserFront_mm;
+
+        // ----------------------------------------------------
+        // FRONT SENSOR IS MANDATORY
+        // ----------------------------------------------------
+
+        if (!sensors.laserFront_valid)
+        {
+            car.stop();
+            continue;
+        }
+
+        bool leftSeen =
+            sensors.laserLeft_valid &&
+            laserLeftDistance < SIDE_SEEN_MM;
+
+        bool rightSeen =
+            sensors.laserRight_valid &&
+            laserRightDistance < SIDE_SEEN_MM;
+
+        bool leftClose =
+            leftSeen &&
+            laserLeftDistance < SIDE_CLOSE_MM;
+
+        bool rightClose =
+            rightSeen &&
+            laserRightDistance < SIDE_CLOSE_MM;
+
+
+        // ----------------------------------------------------
+        // CHOOSE SAFEST TURN DIRECTION
+        // ----------------------------------------------------
+
+        int turnDirection = lastTurnDirection;
+
+        if (leftSeen && rightSeen)
+        {
+            // Turn toward the side with more measured space.
+            turnDirection =
+                (laserRightDistance > laserLeftDistance)
+                ? 1
+                : -1;
+        }
+        else if (leftSeen && !rightSeen)
+        {
+            // Known wall on left -> turn right.
+            turnDirection = 1;
+        }
+        else if (!leftSeen && rightSeen)
+        {
+            // Known wall on right -> turn left.
+            turnDirection = -1;
+        }
+
+        lastTurnDirection = turnDirection;
+
+
+        // ====================================================
+        // PRIORITY 1: IMMEDIATE FRONT COLLISION AVOIDANCE
+        // ====================================================
+
+        if (laserFrontDistance < FRONT_DANGER_MM)
+        {
+            car.stop();
+
+            car.turn(turnDirection * fast);
+
+            // Short pulse, then immediately measure again.
+            delay(80);
+
+            continue;
+        }
+
+
+        // ====================================================
+        // PRIORITY 2: FRONT OBJECT APPROACHING
+        // ====================================================
+
+        if (laserFrontDistance < FRONT_CAUTION_MM)
+        {
+            // Don't continue straight at full speed.
+            car.turn(turnDirection * slow);
+
+            delay(50);
+
+            continue;
+        }
+
+
+        // ====================================================
+        // PRIORITY 3: FUNNEL ENTRY DETECTION
+        // ====================================================
+
+        if (leftClose &&
+            rightClose &&
+            laserFrontDistance > FRONT_CAUTION_MM)
+        {
+            funnelConfirmCounter++;
+
+            if (funnelConfirmCounter >= FUNNEL_CONFIRM_COUNT)
+            {
+                openAreaComplete = true;
+                break;
+            }
+        }
+        else
+        {
+            funnelConfirmCounter = 0;
+        }
+
+
+        // ====================================================
+        // PRIORITY 4: SIDE CORRECTIONS
+        // ====================================================
+
+        if (leftClose && !rightClose)
+        {
+            car.turn(slow);       // right
+        }
+        else if (rightClose && !leftClose)
+        {
+            car.turn(-slow);      // left
+        }
+        else
+        {
+            car.straight(fast);
+        }
+    }
+
+    car.stop();
+
+    for (int i = 0; i < 3; i++)
+    {
+        digitalWrite(whiteLedPin, HIGH);
+        delay(250);
+
+        digitalWrite(whiteLedPin, LOW);
+        delay(250);
+    }
+}

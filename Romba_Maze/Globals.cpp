@@ -95,7 +95,7 @@ int tolerance_US            = 30;
 int tolerance_PhotoResistor = 80;
 float K = 1.0f;
 
-const int targetDistanceWall  = 30;
-const int targetDistanceLight = 12;
+const float targetDistanceWall  = 300.0f;
+const float targetDistanceLight = 120.0f;
 
 SensorReading currentData;

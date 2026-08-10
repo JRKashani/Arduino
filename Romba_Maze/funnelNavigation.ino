@@ -87,9 +87,9 @@ void funnelNavigation(const SensorReading &sensors)
 
             car.stop();
 
-            car.turn(turnDirection * fast);
+            car.turn(-turnDirection * fast);
 
-            delay(80);
+            delay(1000);
 
             continue;
         }
@@ -103,9 +103,9 @@ void funnelNavigation(const SensorReading &sensors)
         {
             correctingLargeOpening = false;
 
-            car.turn(turnDirection * slow);
+            car.turn(-turnDirection * slow);
 
-            delay(50);
+            delay(500);
 
             continue;
         }
@@ -175,6 +175,7 @@ void funnelNavigation(const SensorReading &sensors)
             else
             {
                 car.turn(correctionDirection * slow);
+                delay(50);
             }
 
             continue;
@@ -194,6 +195,7 @@ void funnelNavigation(const SensorReading &sensors)
             correctionDirection = right_or_left;
 
             car.turn(correctionDirection * slow);
+            delay(50);
 
             continue;
         }
@@ -205,7 +207,7 @@ void funnelNavigation(const SensorReading &sensors)
 
         if (abs(delta) > FUNNEL_TOLERANCE)
         {
-            car.turn(right_or_left * slow);
+            car.turn(right_or_left * abs(delta) / 10.0f);
         }
         else
         {

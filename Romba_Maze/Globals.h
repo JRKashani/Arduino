@@ -171,5 +171,5 @@ extern int tolerance_US;
 extern int tolerance_PhotoResistor;
 extern float K;
 
-extern const int targetDistanceWall;
-extern const int targetDistanceLight;
+extern const float targetDistanceWall;
+extern const float targetDistanceLight;
