@@ -50,9 +50,9 @@ void SteeringDualH::turn(int harshenss)
   /*Serial.print("rVel: ");
   Serial.println(rVel);
   Serial.print("lVel: ");
-  Serial.println(lVel);*/
+  Serial.println(lVel);
   Serial.print("rVel - lVel: ");
-  Serial.println(rVel - lVel);
+  Serial.println(rVel - lVel);*/
 }
 
 int SteeringDualH::bias()

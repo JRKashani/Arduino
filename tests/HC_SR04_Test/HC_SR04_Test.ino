@@ -31,10 +31,10 @@
   ------------------------------------------------------------
 */
 
-const uint8_t TRIG_PIN = 9;
-const uint8_t ECHO_PIN = 8;
+const uint8_t TRIG_PIN = 6;
+const uint8_t ECHO_PIN = 7;
 
-const unsigned long ECHO_TIMEOUT_US = 30000UL; // ~30 ms, see notes above
+const unsigned long ECHO_TIMEOUT_US = 15000UL; // ~15 ms, see notes above
 
 void setup() {
   Serial.begin(9600);
@@ -66,5 +66,5 @@ void loop() {
     Serial.println(" cm");
   }
 
-  delay(100); // keep cycle above ~60ms minimum; readable update rate
+  delay(30); // keep cycle above ~30ms minimum; readable update rate
 }

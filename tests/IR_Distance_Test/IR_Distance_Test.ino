@@ -21,7 +21,7 @@
   Sharp recommends a 10 µF or larger bypass capacitor between VCC and GND near the sensor
 */
 
-const uint8_t IR_PIN = A0;
+const uint8_t IR_PIN = A15;
 
 void setup()
 {
@@ -58,7 +58,7 @@ void loop()
     Serial.println(" | Distance: INVALID");
   }
 
-  delay(100);
+  delay(500);
 }
 
 /*

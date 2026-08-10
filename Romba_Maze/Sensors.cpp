@@ -1,6 +1,26 @@
 #include "Sensors.h"
 
-#include <Wire.h>
+#if defined(__has_include)
+    #if __has_include(<Wire.h>)
+        #include <Wire.h>
+    #else
+        #include <stdint.h>
+        #include <stddef.h>
+
+        class TwoWireStub
+        {
+        public:
+            void begin() {}
+            uint8_t beginTransmission(uint8_t) { return 0; }
+            uint8_t endTransmission() { return 0; }
+        };
+
+        static TwoWireStub Wire;
+    #endif
+#else
+    #include <Wire.h>
+#endif
+
 #include <math.h>
 
 

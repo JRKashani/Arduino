@@ -23,8 +23,8 @@ const uint8_t US60_ECHO_PIN  = 3;
 const uint8_t US120_TRIG_PIN = 4;
 const uint8_t US120_ECHO_PIN = 5;
 
-const uint8_t US300_TRIG_PIN = 9;
-const uint8_t US300_ECHO_PIN = 8;
+const uint8_t US300_TRIG_PIN = 6;
+const uint8_t US300_ECHO_PIN = 7;
 
 Ultrasonic US60(US60_TRIG_PIN, US60_ECHO_PIN);
 Ultrasonic US120(US120_TRIG_PIN, US120_ECHO_PIN);

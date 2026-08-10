@@ -1,112 +1,5 @@
-
-#pragma once
-
-#if defined(__has_include)
-#  if __has_include(<Arduino.h>)
-#    include <Arduino.h>
-#    include <Sensors.h>
-#    include "Globals.h"
-#  else
-#    include <cstdint>
-#    include <cstddef>
-#    include <cstdio>
-
-using byte = uint8_t;
-using boolean = bool;
-
-struct SerialClass
-{
-    void begin(unsigned long) {}
-    void print(const char *) {}
-    void print(char) {}
-    void print(int) {}
-    void print(unsigned int) {}
-    void print(long) {}
-    void print(unsigned long) {}
-    void print(float) {}
-    void println(const char *) {}
-    void println(char) {}
-    void println(int) {}
-    void println(unsigned int) {}
-    void println(long) {}
-    void println(unsigned long) {}
-    void println(float) {}
-    void println() {}
-};
-
-inline SerialClass Serial;
-
-inline void pinMode(int, int) {}
-inline void digitalWrite(int, int) {}
-inline void delay(unsigned long) {}
-inline unsigned long millis() { return 0; }
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 13
-#endif
-
-#ifndef OUTPUT
-#define OUTPUT 1
-#endif
-
-#ifndef HIGH
-#define HIGH 1
-#endif
-
-#ifndef LOW
-#define LOW 0
-#endif
-
-struct SensorReading
-{
-    bool US60_valid = false;
-    float US60_cm = 0.0f;
-    bool laserFront_valid = false;
-    float laserFront_mm = 0.0f;
-};
-
-enum RobotStage
-{
-    STAGE_OPEN_AREA,
-    STAGE_FUNNEL,
-    STAGE_WALL_FOLLOWING,
-    STAGE_WADI,
-    STAGE_LIGHT
-};
-
-struct FakeCar
-{
-    void setBias(int) {}
-    template <typename... Args>
-    void attach(Args...) {}
-    void flipRight() {}
-    void stop() {}
-};
-
-inline FakeCar car;
-
-static constexpr int whiteLedPin = 13;
-static constexpr int LEFT_DIR_1 = 2;
-static constexpr int LEFT_DIR_2 = 3;
-static constexpr int LEFT_PWM = 4;
-static constexpr int RIGHT_DIR_1 = 5;
-static constexpr int RIGHT_DIR_2 = 6;
-static constexpr int RIGHT_PWM = 7;
-
-bool setupSensors() { return true; }
-const SensorReading &readSensors(uint8_t) { static SensorReading sensors; return sensors; }
-
-void openAreaNavigation(const SensorReading &) {}
-void funnelNavigation(const SensorReading &) {}
-void wallFollowingNavigation(const SensorReading &) {}
-void wadiNavigation(const SensorReading &) {}
-void lightNavigation(const SensorReading &) {}
-#  endif
-#else
-#  include <Arduino.h>
-#  include <Sensors.h>
-#  include "Globals.h"
-#endif
+#include <Arduino.h>
+#include "Sensors.h"
 
 RobotStage currentStage = STAGE_OPEN_AREA;
 
@@ -124,7 +17,7 @@ void setup()
         RIGHT_DIR_1, RIGHT_DIR_2, RIGHT_PWM);
     car.flipRight();
     car.stop();
-
+        /*
     if (!setupSensors())
     {
         Serial.println("VL53L0X initialization failed");
@@ -138,7 +31,7 @@ void setup()
         }
     }
 
-    Serial.println("Sensors ready");
+    Serial.println("Sensors ready");*/
 }
 
 
@@ -147,15 +40,23 @@ void loop()
     // One acquisition pass for the sensors relevant to the
     // current stage.
     const SensorReading &sensors = readSensors((uint8_t)currentStage);
+
+    Serial.println("2nd breakpoint");
+    Serial.println(currentStage);
+    delay(1000);
     
     switch (currentStage)
     {
         case STAGE_OPEN_AREA:
             // Example of changing which sensor set will be acquired:
             openAreaNavigation(sensors);
-            currentStage = STAGE_FUNNEL;
+            //currentStage = STAGE_FUNNEL;
+            Serial.println("3rd breakpoint");
+            Serial.println(currentStage);
+            delay(500);
+            car.stop();
             break;
-
+/*
         case STAGE_FUNNEL:
             funnelNavigation(sensors);
             currentStage = STAGE_WALL_FOLLOWING;
@@ -175,7 +76,7 @@ void loop()
             lightNavigation(sensors);
             car.stop();
             delay(120000);
-            break;
+            break;*/
     }
 
     // --------------------------------------------------------

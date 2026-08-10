@@ -23,7 +23,7 @@ long Ultrasonic::timing()
   digitalWrite(_trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(_trig, LOW);
-  return pulseIn(_echo, HIGH, 8000UL);
+  return pulseIn(_echo, HIGH, 15000UL);
 }
 
 long Ultrasonic::ranging(int units)
