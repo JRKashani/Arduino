@@ -89,9 +89,9 @@ void openAreaNavigation(const SensorReading &sensors)
     for (int i = 0; i < 3; i++)
     {
         digitalWrite(whiteLedPin, HIGH);
-        delay(125);
+        delay(250);
 
         digitalWrite(whiteLedPin, LOW);
-        delay(125);
+        delay(250);
     }
 }

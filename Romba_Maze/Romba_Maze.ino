@@ -9,7 +9,12 @@ void setup()
 
     pinMode(LED_BUILTIN, OUTPUT);
     pinMode(whiteLedPin, OUTPUT);
+    pinMode(redLedPin, OUTPUT);
+    pinMode(greenLedPin, OUTPUT);
+
     digitalWrite(whiteLedPin, LOW);
+    digitalWrite(redLedPin, LOW);
+    digitalWrite(greenLedPin, LOW);
 
     car.setBias(1);
     car.attach(
@@ -50,18 +55,18 @@ void loop()
         case STAGE_OPEN_AREA:
             // Example of changing which sensor set will be acquired:
             openAreaNavigation(sensors);
-            //currentStage = STAGE_FUNNEL;
+            currentStage = STAGE_FUNNEL;
             Serial.println("3rd breakpoint");
             Serial.println(currentStage);
-            delay(500);
+            //delay(500);
             car.stop();
             break;
-/*
+
         case STAGE_FUNNEL:
             funnelNavigation(sensors);
-            currentStage = STAGE_WALL_FOLLOWING;
+            //currentStage = STAGE_WALL_FOLLOWING;
             break;
-
+/*
         case STAGE_WALL_FOLLOWING:
             wallFollowingNavigation(sensors);
             currentStage = STAGE_WADI;

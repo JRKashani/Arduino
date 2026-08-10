@@ -87,9 +87,9 @@ int right_or_left = 0;   // -1 for left, 1 for right
 
 SteeringDualH car;
 
-int slow     = 50;
-int fast     = 80;
-int veryFast = 150;
+int slow     = 30;
+int fast     = 50;
+int veryFast = 100;
 
 int tolerance_US            = 30;
 int tolerance_PhotoResistor = 80;
