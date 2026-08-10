@@ -1,7 +1,7 @@
 void openAreaNavigation(const SensorReading &sensors)
 {
     const unsigned long OPEN_AREA_DRIVE_TIME_MS = 5000;  // CALIBRATE
-    const int FRONT_STOP_DISTANCE_MM = 120;              // safety only
+    const float FRONT_STOP_DISTANCE_MM = 120.0f;              // safety only
 
     unsigned long startTime = millis();
 

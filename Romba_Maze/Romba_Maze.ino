@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Sensors.h"
+#include "Navigation.h"
 
 RobotStage currentStage = STAGE_OPEN_AREA;
 
@@ -16,7 +17,7 @@ void setup()
     digitalWrite(redLedPin, LOW);
     digitalWrite(greenLedPin, LOW);
 
-    car.setBias(1.1);
+    car.setBias(11);
     car.attach(
         LEFT_DIR_1, LEFT_DIR_2, LEFT_PWM,
         RIGHT_DIR_1, RIGHT_DIR_2, RIGHT_PWM);
