@@ -58,6 +58,7 @@ extern Ultrasonic US300;
 extern const int redLedPin;
 extern const int greenLedPin;
 
+/*
 extern const int trigPin60;
 extern const int echoPin60;
 
@@ -69,6 +70,79 @@ extern const int echoPin240;
 
 extern const int trigPin300;
 extern const int echoPin300;
+*/
+
+// ============================================================
+// MOTOR PINS
+// ============================================================
+
+extern const uint8_t LEFT_DIR_1;
+extern const uint8_t LEFT_DIR_2;
+extern const uint8_t LEFT_PWM;
+
+extern const uint8_t RIGHT_DIR_1;
+extern const uint8_t RIGHT_DIR_2;
+extern const uint8_t RIGHT_PWM;
+
+
+// ============================================================
+// HC-SR04 ULTRASONIC SENSORS
+// ============================================================
+
+extern const uint8_t US60_TRIG_PIN;
+extern const uint8_t US60_ECHO_PIN;
+
+extern const uint8_t US120_TRIG_PIN;
+extern const uint8_t US120_ECHO_PIN;
+
+extern const uint8_t US240_TRIG_PIN;
+extern const uint8_t US240_ECHO_PIN;
+
+extern const uint8_t US300_TRIG_PIN;
+extern const uint8_t US300_ECHO_PIN;
+
+
+// ============================================================
+// VL53L0X
+// Mega hardware I2C:
+// SDA = 20
+// SCL = 21
+// ============================================================
+
+extern const uint8_t LASER_LEFT_XSHUT_PIN;
+extern const uint8_t LASER_RIGHT_XSHUT_PIN;
+
+
+// ============================================================
+// SHARP IR
+// ============================================================
+
+extern const uint8_t IR_LEFT_PIN;
+extern const uint8_t IR_RIGHT_PIN;
+
+
+// ============================================================
+// LDR
+// ============================================================
+
+extern const uint8_t LDR_LEFT_PIN;
+extern const uint8_t LDR_RIGHT_PIN;
+
+
+// ============================================================
+// ADXL335
+// ============================================================
+
+extern const uint8_t ACCEL_X_PIN;
+extern const uint8_t ACCEL_Y_PIN;
+extern const uint8_t ACCEL_Z_PIN;
+
+
+// ============================================================
+// BUTTON
+// ============================================================
+
+extern const uint8_t BUTTON_PIN;
 
 extern VL53L0X laserLeft;
 extern VL53L0X laserRight;
