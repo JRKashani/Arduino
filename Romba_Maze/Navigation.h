@@ -10,11 +10,25 @@ struct LaserMinimum
     unsigned long timestamp_ms;
 };
 
+struct LaserBalanceMinimum
+{
+    uint16_t difference_mm;
+    uint16_t left_mm;
+    uint16_t right_mm;
+    unsigned long timestamp_ms;
+};
+
 struct LaserScanResult
 {
     LaserMinimum left;
     LaserMinimum front;
     LaserMinimum right;
+
+    LaserMinimum leftRight;
+    LaserMinimum leftFront;
+    LaserMinimum rightFront;
+
+    LaserBalanceMinimum leftRightBalance;
 };
 
 LaserScanResult scanWithRobot();

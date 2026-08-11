@@ -32,13 +32,23 @@ LaserScanResult scanWithRobot()
     LaserScanResult result;
 
     // Initialize minima to impossible/high values
-    result.left.distance_mm  = UINT16_MAX;
-    result.front.distance_mm = UINT16_MAX;
-    result.right.distance_mm = UINT16_MAX;
+    result.left.distance_mm       = UINT16_MAX;
+    result.front.distance_mm      = UINT16_MAX;
+    result.right.distance_mm      = UINT16_MAX;
 
-    result.left.timestamp_ms  = 0;
-    result.front.timestamp_ms = 0;
-    result.right.timestamp_ms = 0;
+    result.leftRight.distance_mm  = UINT16_MAX;
+    result.leftFront.distance_mm  = UINT16_MAX;
+    result.rightFront.distance_mm = UINT16_MAX;
+
+    result.leftRightBalance.difference_mm = UINT16_MAX;
+
+    result.left.timestamp_ms       = 0;
+    result.front.timestamp_ms      = 0;
+    result.right.timestamp_ms      = 0;
+
+    result.leftRight.timestamp_ms  = 0;
+    result.leftFront.timestamp_ms  = 0;
+    result.rightFront.timestamp_ms = 0;
 
     unsigned long scanStart = millis();
     unsigned long lastSample = 0;
@@ -87,6 +97,85 @@ LaserScanResult scanWithRobot()
         {
             result.right.distance_mm = currentData.laserRight_mm;
             result.right.timestamp_ms = t;
+        }
+        // ------------------------------------------------
+        // COMBINED LASER MINIMA
+        // ------------------------------------------------
+
+        // LEFT + RIGHT
+        if (currentData.laserLeft_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserLeft_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserRight_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserRight_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserLeft_mm +
+                        currentData.laserRight_mm;
+
+            if (sum < result.leftRight.distance_mm)
+            {
+                result.leftRight.distance_mm = sum;
+                result.leftRight.timestamp_ms = t;
+            }
+        }
+
+
+        // LEFT + FRONT
+        if (currentData.laserLeft_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserLeft_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserFront_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserFront_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserLeft_mm +
+                        currentData.laserFront_mm;
+
+            if (sum < result.leftFront.distance_mm)
+            {
+                result.leftFront.distance_mm = sum;
+                result.leftFront.timestamp_ms = t;
+            }
+        }
+
+
+        // RIGHT + FRONT
+        if (currentData.laserRight_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserRight_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserFront_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserFront_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserRight_mm +
+                        currentData.laserFront_mm;
+
+            if (sum < result.rightFront.distance_mm)
+            {
+                result.rightFront.distance_mm = sum;
+                result.rightFront.timestamp_ms = t;
+            }
+        }
+        // ------------------------------------------------
+        // BEST LEFT / RIGHT BALANCE
+        // ------------------------------------------------
+
+        if (currentData.laserLeft_valid &&
+            currentData.laserRight_valid)
+        {
+            uint16_t leftDistance =
+                (uint16_t)currentData.laserLeft_mm;
+
+            uint16_t rightDistance =
+                (uint16_t)currentData.laserRight_mm;
+
+            uint16_t difference =
+                (leftDistance > rightDistance)
+                    ? leftDistance - rightDistance
+                    : rightDistance - leftDistance;
+
+            if (difference < result.leftRightBalance.difference_mm)
+            {
+                result.leftRightBalance.difference_mm = difference;
+                result.leftRightBalance.left_mm = leftDistance;
+                result.leftRightBalance.right_mm = rightDistance;
+                result.leftRightBalance.timestamp_ms = t;
+            }
         }
     }
 
@@ -141,6 +230,87 @@ LaserScanResult scanWithRobot()
         {
             result.right.distance_mm = currentData.laserRight_mm;
             result.right.timestamp_ms = t;
+        }
+        
+        // ------------------------------------------------
+        // COMBINED LASER MINIMA
+        // ------------------------------------------------
+
+        // LEFT + RIGHT
+        if (currentData.laserLeft_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserLeft_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserRight_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserRight_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserLeft_mm +
+                        currentData.laserRight_mm;
+
+            if (sum < result.leftRight.distance_mm)
+            {
+                result.leftRight.distance_mm = sum;
+                result.leftRight.timestamp_ms = t;
+            }
+        }
+
+
+        // LEFT + FRONT
+        if (currentData.laserLeft_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserLeft_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserFront_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserFront_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserLeft_mm +
+                        currentData.laserFront_mm;
+
+            if (sum < result.leftFront.distance_mm)
+            {
+                result.leftFront.distance_mm = sum;
+                result.leftFront.timestamp_ms = t;
+            }
+        }
+
+
+        // RIGHT + FRONT
+        if (currentData.laserRight_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserRight_mm <= MAX_VALID_DISTANCE &&
+            currentData.laserFront_mm >= MIN_VALID_DISTANCE &&
+            currentData.laserFront_mm <= MAX_VALID_DISTANCE)
+        {
+            uint16_t sum = currentData.laserRight_mm +
+                        currentData.laserFront_mm;
+
+            if (sum < result.rightFront.distance_mm)
+            {
+                result.rightFront.distance_mm = sum;
+                result.rightFront.timestamp_ms = t;
+            }
+        }
+        
+        // ------------------------------------------------
+        // BEST LEFT / RIGHT BALANCE
+        // ------------------------------------------------
+
+        if (currentData.laserLeft_valid &&
+            currentData.laserRight_valid)
+        {
+            uint16_t leftDistance =
+                (uint16_t)currentData.laserLeft_mm;
+
+            uint16_t rightDistance =
+                (uint16_t)currentData.laserRight_mm;
+
+            uint16_t difference =
+                (leftDistance > rightDistance)
+                    ? leftDistance - rightDistance
+                    : rightDistance - leftDistance;
+
+            if (difference < result.leftRightBalance.difference_mm)
+            {
+                result.leftRightBalance.difference_mm = difference;
+                result.leftRightBalance.left_mm = leftDistance;
+                result.leftRightBalance.right_mm = rightDistance;
+                result.leftRightBalance.timestamp_ms = t;
+            }
         }
     }
 

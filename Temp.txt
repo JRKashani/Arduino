@@ -1,0 +1,224 @@
+
+#include "Globals.h"
+#include "Sensors.h"
+#include "Navigation.h"
+
+
+const unsigned long SCAN_SWEEP_TIME_MS = 1000;
+const unsigned long SCAN_PAUSE_MS = 100;
+const float SCAN_SWEEP_ANGLE_DEG = 90.0f;
+
+
+// Converts scan timestamp to robot heading.
+//
+// Start:        0 deg
+// Sweep 1:      0 -> +90 deg   (CCW)
+// Sweep 2:    +90 -> -90 deg   (CW)
+//
+// Assumes:
+//   first sweep = 1000 ms
+//   pause       = 100 ms
+//   second sweep = 2000 ms
+//
+float scanTimestampToAngle(unsigned long timestamp_ms)
+{
+    // First sweep: 0 -> +90 deg
+    if (timestamp_ms <= SCAN_SWEEP_TIME_MS)
+    {
+        return SCAN_SWEEP_ANGLE_DEG *
+               ((float)timestamp_ms / (float)SCAN_SWEEP_TIME_MS);
+    }
+
+    const unsigned long secondSweepStart =
+        SCAN_SWEEP_TIME_MS + SCAN_PAUSE_MS;
+
+    // No measurements should actually occur during the pause.
+    if (timestamp_ms < secondSweepStart)
+    {
+        return SCAN_SWEEP_ANGLE_DEG;
+    }
+
+    // Second sweep:
+    // +90 deg at its beginning
+    //   0 deg after 1000 ms
+    // -90 deg after 2000 ms
+    unsigned long secondSweepElapsed =
+        timestamp_ms - secondSweepStart;
+
+    return SCAN_SWEEP_ANGLE_DEG -
+           SCAN_SWEEP_ANGLE_DEG *
+           ((float)secondSweepElapsed /
+            (float)SCAN_SWEEP_TIME_MS);
+}
+
+
+void printMinimum(
+    const __FlashStringHelper *name,
+    const LaserMinimum &minimum)
+{
+    Serial.print(name);
+    Serial.print(F(": "));
+
+    if (minimum.distance_mm == UINT16_MAX)
+    {
+        Serial.println(F("NO VALID READING"));
+        return;
+    }
+
+    float angle =
+        scanTimestampToAngle(minimum.timestamp_ms);
+
+    Serial.print(minimum.distance_mm);
+    Serial.print(F(" mm   at "));
+
+    if (angle >= 0)
+        Serial.print('+');
+
+    Serial.print(angle, 1);
+    Serial.println(F(" deg"));
+}
+
+
+void printScanResult(const LaserScanResult &scan)
+{
+    Serial.println();
+    Serial.println(F("========== SCAN RESULT =========="));
+
+    Serial.println(F("--- INDIVIDUAL LASERS ---"));
+
+    printMinimum(F("LEFT "), scan.left);
+    printMinimum(F("FRONT"), scan.front);
+    printMinimum(F("RIGHT"), scan.right);
+
+    Serial.println();
+
+    Serial.println(F("--- PAIR MINIMA ---"));
+
+    printMinimum(F("LEFT + RIGHT"), scan.leftRight);
+    printMinimum(F("LEFT + FRONT"), scan.leftFront);
+    printMinimum(F("RIGHT + FRONT"), scan.rightFront);
+
+    Serial.println(F("================================="));
+    Serial.println();
+}
+
+void setup()
+{
+    Serial.begin(115200);
+
+    delay(1000);
+
+    Serial.println();
+    Serial.println(F("=== ROBOT LASER SCANNER TEST ==="));
+
+
+    // -----------------------------
+    // MOTOR SETUP
+    // -----------------------------
+
+    car.attach(
+        LEFT_DIR_1,
+        LEFT_DIR_2,
+        LEFT_PWM,
+        RIGHT_DIR_1,
+        RIGHT_DIR_2,
+        RIGHT_PWM
+    );
+
+    // Keep whatever polarity correction your robot needs.
+    // Uncomment if this is what your normal robot setup uses:
+    //
+    car.flipRight();
+
+    // Use your calibrated bias here.
+    car.setBias(11);
+
+    car.stop();
+
+
+    // -----------------------------
+    // SENSOR SETUP
+    // -----------------------------
+
+    Serial.println(F("Initializing lasers..."));
+
+    if (!setupSensors())
+    {
+        Serial.println(F("ERROR: laser initialization failed."));
+        Serial.println(F("Test stopped."));
+
+        while (true)
+        {
+            car.stop();
+            delay(1000);
+        }
+    }
+
+    Serial.println(F("Lasers initialized successfully."));
+
+
+    // -----------------------------
+    // QUICK STATIC SENSOR CHECK
+    // -----------------------------
+
+    Serial.println(F("Checking current laser readings..."));
+
+    const SensorReading &s = readSensors(STAGE_OPEN_AREA);
+
+    Serial.print(F("Left:  "));
+    Serial.print(s.laserLeft_mm);
+    Serial.print(F(" mm   valid="));
+    Serial.println(s.laserLeft_valid);
+
+    Serial.print(F("Front: "));
+    Serial.print(s.laserFront_mm);
+    Serial.print(F(" mm   valid="));
+    Serial.println(s.laserFront_valid);
+
+    Serial.print(F("Right: "));
+    Serial.print(s.laserRight_mm);
+    Serial.print(F(" mm   valid="));
+    Serial.println(s.laserRight_valid);
+
+
+    Serial.println();
+    Serial.println(F("Place robot in test position."));
+    Serial.println(F("Send S in Serial Monitor to start scan."));
+}
+
+
+void loop()
+{
+    if (Serial.available() == 0)
+        return;
+
+    char command = Serial.read();
+
+    // Accept upper or lower case S
+    if (command != 'S' && command != 's')
+        return;
+
+
+    Serial.println();
+    Serial.println(F("SCAN STARTING IN 2 SECONDS..."));
+
+    car.stop();
+    delay(2000);
+
+
+    // -----------------------------
+    // RUN THE ACTUAL FUNCTION
+    // -----------------------------
+
+    LaserScanResult scan = scanWithRobot();
+
+
+    // -----------------------------
+    // PRINT RESULT
+    // -----------------------------
+
+    printScanResult(scan);
+
+    Serial.println(F("Scan finished."));
+    Serial.println(F("Send S to scan again."));
+}
