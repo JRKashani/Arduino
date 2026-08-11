@@ -29,8 +29,16 @@ struct LaserScanResult
     LaserMinimum rightFront;
 
     LaserBalanceMinimum leftRightBalance;
+
+    bool emergencyEscapePerformed;
 };
+
+void wallFollowingNavigation();
+void resetWallFollowingNavigation();
 
 LaserScanResult scanWithRobot();
 
 void funnelNavigation(const SensorReading &sensors);
+
+
+

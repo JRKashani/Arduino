@@ -65,14 +65,18 @@ void loop()
 
         case STAGE_FUNNEL:
             funnelNavigation(sensors);
-            //currentStage = STAGE_WALL_FOLLOWING;
-            break;
-/*
-        case STAGE_WALL_FOLLOWING:
-            wallFollowingNavigation(sensors);
-            currentStage = STAGE_WADI;
+            resetWallFollowingNavigation();
+            currentStage = STAGE_WALL_FOLLOWING;
             break;
 
+        case STAGE_WALL_FOLLOWING:
+            wallFollowingNavigation();
+            /*if(new_stage)
+            {
+                currentStage = STAGE_WADI;
+            }*/
+            break;
+/*
         case STAGE_WADI:
             wadiNavigation(sensors);
             currentStage = STAGE_LIGHT;

@@ -59,6 +59,9 @@ static void updateLeftRightBalance(
     }
 }
 
+static bool emergencyEscapeDuringScan(
+    float robotHeadingDeg);
+
 LaserScanResult scanWithRobot()
 {
     const unsigned long SWEEP_TIME = 1000;
@@ -68,6 +71,7 @@ LaserScanResult scanWithRobot()
     const uint16_t MAX_VALID_DISTANCE = 4000;
 
     LaserScanResult result;
+    result.emergencyEscapePerformed = false;
 
     // Initialize minima to impossible/high values
     result.left.distance_mm       = UINT16_MAX;
@@ -109,6 +113,21 @@ LaserScanResult scanWithRobot()
         readSensors(STAGE_OPEN_AREA);
 
         unsigned long t = millis() - scanStart;
+
+        unsigned long sweepElapsed =
+            millis() - sweepStart;
+
+        float robotHeadingDeg =
+            90.0f *
+            ((float)sweepElapsed /
+            (float)SWEEP_TIME);
+
+        if (emergencyEscapeDuringScan(robotHeadingDeg))
+        {
+            result.emergencyEscapePerformed = true;
+
+            return result;
+        }
         
         updateLeftRightBalance(result, t);
 
@@ -245,6 +264,23 @@ LaserScanResult scanWithRobot()
 
         unsigned long t = millis() - scanStart;
 
+        unsigned long sweepElapsed =
+            millis() - sweepStart;
+
+        float robotHeadingDeg =
+            90.0f -
+            90.0f *
+            ((float)sweepElapsed /
+            (float)SWEEP_TIME);
+
+
+        if (emergencyEscapeDuringScan(robotHeadingDeg))
+        {
+            result.emergencyEscapePerformed = true;
+
+            return result;
+        }
+
         updateLeftRightBalance(result, t);
 
         // LEFT LASER
@@ -371,6 +407,15 @@ LaserScanResult scanWithRobot()
 // FUNNEL NAVIGATION SETTINGS
 // ============================================================
 
+static const uint16_t EMERGENCY_DISTANCE_MM = 50;
+static const unsigned long EMERGENCY_ESCAPE_TIME_MS = 1000UL;
+
+// Emergency rotation uses veryFast.
+//
+// Your measured calibration:
+// 1000 ms ~= 90 degrees at the scanner turning speed.
+static const unsigned long EMERGENCY_TURN_90_MS = 1000UL;
+
 // Scan calibration:
 // 1000 ms rotation ~= 90 degrees.
 static const unsigned long SCAN_SWEEP_TIME_MS = 1000UL;
@@ -439,6 +484,166 @@ static float normalizeAngle180(float angle)
     return angle;
 }
 
+static bool emergencyEscapeDuringScan(
+    float robotHeadingDeg)
+{
+    float closestDistance = 100000.0f;
+    float sensorOffsetDeg = 0.0f;
+    bool emergency = false;
+
+
+    // ------------------------------------------------
+    // LEFT
+    // ------------------------------------------------
+
+    if (currentData.laserLeft_valid &&
+        currentData.laserLeft_mm < EMERGENCY_DISTANCE_MM &&
+        currentData.laserLeft_mm < closestDistance)
+    {
+        closestDistance =
+            currentData.laserLeft_mm;
+
+        sensorOffsetDeg =
+            LEFT_LASER_OFFSET_DEG;
+
+        emergency = true;
+    }
+
+
+    // ------------------------------------------------
+    // FRONT
+    // ------------------------------------------------
+
+    if (currentData.laserFront_valid &&
+        currentData.laserFront_mm < EMERGENCY_DISTANCE_MM &&
+        currentData.laserFront_mm < closestDistance)
+    {
+        closestDistance =
+            currentData.laserFront_mm;
+
+        sensorOffsetDeg =
+            FRONT_LASER_OFFSET_DEG;
+
+        emergency = true;
+    }
+
+
+    // ------------------------------------------------
+    // RIGHT
+    // ------------------------------------------------
+
+    if (currentData.laserRight_valid &&
+        currentData.laserRight_mm < EMERGENCY_DISTANCE_MM &&
+        currentData.laserRight_mm < closestDistance)
+    {
+        closestDistance =
+            currentData.laserRight_mm;
+
+        sensorOffsetDeg =
+            RIGHT_LASER_OFFSET_DEG;
+
+        emergency = true;
+    }
+
+
+    if (!emergency)
+        return false;
+
+
+    // =================================================
+    // EMERGENCY
+    // =================================================
+
+    car.stop();
+
+
+    // Direction from robot's ORIGINAL scan heading
+    // toward the obstacle.
+    float obstacleBearing =
+        normalizeAngle180(
+            robotHeadingDeg +
+            sensorOffsetDeg);
+
+
+    // Put the robot's tail toward the obstacle:
+    // nose points 180 degrees away.
+    float escapeHeading =
+        normalizeAngle180(
+            obstacleBearing +
+            180.0f);
+
+
+    // Current robot orientation is robotHeadingDeg.
+    float turnRequired =
+        normalizeAngle180(
+            escapeHeading -
+            robotHeadingDeg);
+
+
+    Serial.println();
+    Serial.println(F("*** EMERGENCY ESCAPE ***"));
+
+    Serial.print(F("Distance: "));
+    Serial.print(closestDistance, 0);
+    Serial.println(F(" mm"));
+
+    Serial.print(F("Obstacle bearing: "));
+    Serial.print(obstacleBearing, 1);
+    Serial.println(F(" deg"));
+
+    Serial.print(F("Emergency turn: "));
+    Serial.print(turnRequired, 1);
+    Serial.println(F(" deg"));
+
+
+    // ------------------------------------------------
+    // TURN AWAY
+    // ------------------------------------------------
+
+    unsigned long turnTime =
+        (unsigned long)(
+            fabs(turnRequired) *
+            ((float)EMERGENCY_TURN_90_MS / 90.0f)
+        );
+
+
+    car.straight(0);
+
+    if (turnRequired > 0.0f)
+    {
+        // CCW
+        car.turn(veryFast);
+    }
+    else
+    {
+        // CW
+        car.turn(-veryFast);
+    }
+
+    delay(turnTime);
+
+    car.stop();
+
+    delay(100);
+
+
+    // ------------------------------------------------
+    // ESCAPE
+    // ------------------------------------------------
+
+    car.turn(0);
+    car.straight(fast);
+
+    delay(EMERGENCY_ESCAPE_TIME_MS);
+
+    car.stop();
+
+
+    Serial.println(F("*** ESCAPE COMPLETE ***"));
+    Serial.println();
+
+    return true;
+}
 
 static float clampScanHeading(float angle)
 {
@@ -714,7 +919,7 @@ void funnelNavigation(const SensorReading &sensors)
     // STATE PRESERVED BETWEEN CALLS
     // ------------------------------------------------
 
-    static bool haveCompletedScan = false;
+    static bool funnelStarted = false;
 
     static unsigned long lastScanCompleted_ms = 0;
 
@@ -730,10 +935,18 @@ void funnelNavigation(const SensorReading &sensors)
     // Change this to "fast" if desired.
     // The timeout automatically changes with it.
     //
-    const int driveSpeed = veryFast;
+    const int driveSpeed = fast;
 
 
     unsigned long maximumTimeWithoutScan;
+
+    if (!funnelStarted)
+    {
+        funnelStarted = true;
+        lastScanCompleted_ms = millis();
+
+        Serial.println(F("FUNNEL: starting forward drive"));
+    }
 
     if (driveSpeed >= veryFast)
         maximumTimeWithoutScan =
@@ -748,17 +961,6 @@ void funnelNavigation(const SensorReading &sensors)
     // ------------------------------------------------
 
     bool shouldScan = false;
-
-
-    // First entry into funnel always begins with a scan.
-    if (!haveCompletedScan)
-    {
-        shouldScan = true;
-
-        Serial.println(
-            F("FUNNEL: initial scan"));
-    }
-
 
     // ------------------------------------------------
     // Trigger 1:
@@ -854,6 +1056,18 @@ void funnelNavigation(const SensorReading &sensors)
     LaserScanResult scan =
         scanWithRobot();
 
+    if (scan.emergencyEscapePerformed)
+    {
+        lastScanCompleted_ms = millis();
+
+        geometryTriggerArmed = false;
+
+        Serial.println(
+            F("FUNNEL: emergency escape performed"));
+
+        return;
+    }    
+
 
     // ------------------------------------------------
     // Get balanced funnel width
@@ -944,8 +1158,6 @@ void funnelNavigation(const SensorReading &sensors)
 
     // Reset scan timers only AFTER scanning and steering.
     lastScanCompleted_ms = millis();
-
-    haveCompletedScan = true;
 
     geometryTriggerArmed = false;
 
