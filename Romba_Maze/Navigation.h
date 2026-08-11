@@ -32,3 +32,5 @@ struct LaserScanResult
 };
 
 LaserScanResult scanWithRobot();
+
+void funnelNavigation(const SensorReading &sensors);

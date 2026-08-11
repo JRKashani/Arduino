@@ -49,7 +49,7 @@ void loop()
 
     Serial.println("2nd breakpoint");
     Serial.println(currentStage);
-    delay(1000);
+    //delay(1000);
     
     switch (currentStage)
     {
