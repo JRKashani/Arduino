@@ -19,10 +19,9 @@ void runWallFollow(const SensorData &d) {
   const float errorMm = d.rightWallCm * 10.0f - (float)RIGHT_WALL_FOLLOW_TARGET_MM;
   const int steer = steerFromError(errorMm, WALL_FOLLOW_GAIN,
                                    WALL_FOLLOW_MAX_STEER, WALL_FOLLOW_DEADBAND_MM);
-  // error > 0 => too far from the right wall => steer toward it (turn right =
-  // negative harshness). If the robot corrects the wrong way on the bench,
-  // flip the sign on this one line.
-  driveContinuous(DRIVE_SPEED, -steer);
+  // error > 0 => too far from the right wall => steer toward it. Verified on
+  // the bench: positive steer drives the robot toward the right wall here.
+  driveContinuous(DRIVE_SPEED, steer);
 }
 } // namespace
 
