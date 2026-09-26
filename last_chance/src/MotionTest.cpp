@@ -1,6 +1,7 @@
 #include "MotionTest.h"
 #include "MotionCapsule.h"
 #include "SensorsCapsule.h"
+#include "StageManager.h"
 #include "DEFINE.h"
 
 void printMotionTestMenu() {
@@ -8,6 +9,7 @@ void printMotionTestMenu() {
   Serial.print(F("F: forward ")); Serial.print(MOTION_TEST_DISTANCE_CM);
   Serial.println(F(" cm; L: left quarter-circle; R: right quarter-circle"));
   Serial.println(F("S: stop/cancel; T: toggle sensor telemetry; H/?: help."));
+  Serial.println(F("3: run right-wall follow stage; X: stop stage."));
   Serial.println(F("Send one command at a time. Timed estimates; no obstacle stop."));
 }
 
@@ -16,14 +18,22 @@ void runMotionTest() {
     char c = Serial.read();
     if (c == '\r' || c == '\n' || c == ' ' || c == '\t') continue;
     if (c >= 'a' && c <= 'z') c -= 'a' - 'A';
-    if (c == 'S') {
-      stopMotion();
+    if (c == 'S' || c == 'X') {
+      if (stageRunning()) stopStage();
+      else { stopMotion(); Serial.println(F("STOPPED/CANCELLED")); }
       while (Serial.available()) Serial.read();
-      Serial.println(F("STOPPED/CANCELLED"));
       return;
     }
     if (c == 'T') { // toggle telemetry without affecting motion state
       toggleSensorTelemetry();
+      continue;
+    }
+    if (c >= '1' && c <= '5') { // start a mission stage
+      startStage((uint8_t)(c - '0'));
+      continue;
+    }
+    if (stageRunning()) { // a stage owns the motors; ignore timed test moves
+      Serial.println(F("Stage running; send X to stop."));
       continue;
     }
     if (motionBusy()) {

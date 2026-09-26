@@ -5,7 +5,9 @@
 
 namespace {
 SteeringDualH motors;
-enum class State { Idle, Countdown, Moving };
+// Manual = a stage is driving continuously via driveContinuous(); the timed
+// state machine in runMotionCapsule() stays out of the way in that state.
+enum class State { Idle, Countdown, Moving, Manual };
 State state = State::Idle;
 bool initialized = false;
 unsigned long phaseStartMs = 0, durationMs = 0;
@@ -57,6 +59,14 @@ bool driveCm(float distanceCm) {
   const float duration = 1000.0f * distanceCm / MOTION_FORWARD_CM_PER_SECOND;
   if (!isfinite(duration) || duration < 1.0f || duration > 30000.0f) return false;
   return scheduleMotion(static_cast<unsigned long>(duration + 0.5f), 0);
+}
+
+void driveContinuous(int speed, int steer) {
+  if (!initialized) return;
+  state = State::Manual;
+  motors.setBias(MOTOR_BALANCE_BIAS);
+  motors.straight(speed);
+  if (steer != 0) motors.turn(steer); // positive = left, negative = right
 }
 
 bool turnQuarterCircle(TurnDirection direction) {

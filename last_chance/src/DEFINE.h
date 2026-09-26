@@ -267,8 +267,10 @@ const int RIGHT_WALL_SEARCH_STEP_INCREMENT = 2;
 const int RIGHT_WALL_SEARCH_STEP_MAX = 15;
 
 // Stage 3
-const int RIGHT_WALL_FOLLOW_TARGET_MM = 300;
-const float WALL_FOLLOW_GAIN = 0.05;
+const int RIGHT_WALL_FOLLOW_TARGET_MM = 300; // 30 cm from robot center
+const float WALL_FOLLOW_GAIN = 0.05;         // steering harshness per mm of error
+const int WALL_FOLLOW_MAX_STEER = 30;        // clamp on the proportional steer
+const float WALL_FOLLOW_DEADBAND_MM = 15.0;  // no correction within this band
 
 // Emergency recovery
 const float FRONT_EMERGENCY_STOP_CM = 20.0;
