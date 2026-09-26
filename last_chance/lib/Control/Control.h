@@ -17,4 +17,9 @@ int steerFromError(float error, float gain, int maxOutput, float deadband);
 int steerFromPD(float error, float dError, float kp, float kd,
                 int maxOutput, float deadband);
 
+// Speed scheduling: slow down while steering hard, so a large correction turns
+// the heading around in less sideways travel. Linear from baseSpeed at steer 0
+// down to minSpeed at |steer| >= maxSteer.
+int scaleSpeedBySteer(int baseSpeed, int minSpeed, int steer, int maxSteer);
+
 #endif

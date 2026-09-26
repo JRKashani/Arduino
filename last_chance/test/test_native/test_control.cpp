@@ -43,6 +43,23 @@ void test_pd_clamp(void) {
   TEST_ASSERT_EQUAL_INT(30, steerFromPD(2000.0f, 2000.0f, 0.08f, 0.05f, 30, 15.0f));
 }
 
+// --- Speed scheduling: base 50, min 30, maxSteer 25 ---
+
+void test_speed_full_when_straight(void) {
+  TEST_ASSERT_EQUAL_INT(50, scaleSpeedBySteer(50, 30, 0, 25));
+}
+
+void test_speed_min_at_max_steer_either_sign(void) {
+  TEST_ASSERT_EQUAL_INT(30, scaleSpeedBySteer(50, 30, 25, 25));
+  TEST_ASSERT_EQUAL_INT(30, scaleSpeedBySteer(50, 30, -25, 25));
+  TEST_ASSERT_EQUAL_INT(30, scaleSpeedBySteer(50, 30, 40, 25)); // beyond clamp
+}
+
+void test_speed_linear_midpoint(void) {
+  // half steer => halfway between 50 and 30
+  TEST_ASSERT_EQUAL_INT(40, scaleSpeedBySteer(50, 30, 12, 24));
+}
+
 int main(int, char **) {
   UNITY_BEGIN();
   RUN_TEST(test_zero_within_deadband);
@@ -53,5 +70,8 @@ int main(int, char **) {
   RUN_TEST(test_pd_derivative_acts_inside_deadband);
   RUN_TEST(test_pd_damps_when_approaching);
   RUN_TEST(test_pd_clamp);
+  RUN_TEST(test_speed_full_when_straight);
+  RUN_TEST(test_speed_min_at_max_steer_either_sign);
+  RUN_TEST(test_speed_linear_midpoint);
   return UNITY_END();
 }

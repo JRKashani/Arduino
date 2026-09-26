@@ -58,7 +58,10 @@ void runWallFollow(const SensorData &d) {
   // steers the robot away from the right wall, negative steers toward it.
   // error > 0 (too far) must steer toward the wall => command = -corr.
   const int steerCmd = -corr;
-  driveContinuous(DRIVE_SPEED, steerCmd);
+  // Slow down while correcting hard: less sideways travel per heading change.
+  const int speed = scaleSpeedBySteer(DRIVE_SPEED, WALL_FOLLOW_MIN_SPEED,
+                                      steerCmd, WALL_FOLLOW_MAX_STEER);
+  driveContinuous(speed, steerCmd);
 
   STAGE_LOG(
     Serial.print(F("WALL3 rWall=")); Serial.print(d.rightWallCm, 1);
@@ -67,7 +70,7 @@ void runWallFollow(const SensorData &d) {
     Serial.print(F("mm/s steer=")); Serial.print(steerCmd);
     Serial.print(steerCmd > 0 ? F(" away") : (steerCmd < 0 ? F(" toward") : F(" hold")));
     if (corr != 0 && abs(corr) >= WALL_FOLLOW_MAX_STEER) Serial.print(F(" CLAMPED"));
-    Serial.print(F(" spd=")); Serial.print(DRIVE_SPEED);
+    Serial.print(F(" spd=")); Serial.print(speed);
     Serial.print(F(" front="));
     if (d.frontValid) Serial.print(d.frontCm, 1); else Serial.print(F("--"));
     Serial.println(F("cm")));

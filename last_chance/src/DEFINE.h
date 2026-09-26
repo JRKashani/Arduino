@@ -275,6 +275,8 @@ const float WALL_FOLLOW_DEADBAND_MM = 5.0;   // no P correction within this band
 const float WALL_FOLLOW_DERIV_GAIN = 0.30;   // Kd: steer per (mm/s); ~critical damping for Kp 0.10 (model: zeta~0.9)
 const unsigned long WALL_FOLLOW_DERIV_INTERVAL_MS = 100UL; // derivative recompute cadence (stable dt)
 const float WALL_FOLLOW_DERIV_LPF_ALPHA = 0.4f; // dError low-pass (0..1, higher = less smoothing)
+// Speed scheduling: DRIVE_SPEED when steering straight, down to this at max steer.
+const int WALL_FOLLOW_MIN_SPEED = 30;
 
 // Rate limit for stage decision logging (0 = log every loop iteration).
 const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;

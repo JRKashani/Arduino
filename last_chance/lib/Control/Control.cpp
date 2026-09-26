@@ -23,3 +23,11 @@ int steerFromPD(float error, float dError, float kp, float kd,
   long rounded = (long)(out >= 0.0f ? out + 0.5f : out - 0.5f);
   return clampInt(rounded, -maxOutput, maxOutput);
 }
+
+int scaleSpeedBySteer(int baseSpeed, int minSpeed, int steer, int maxSteer) {
+  if (maxSteer <= 0) return baseSpeed;
+  int mag = steer < 0 ? -steer : steer;
+  if (mag > maxSteer) mag = maxSteer;
+  const float speed = baseSpeed - (float)(baseSpeed - minSpeed) * mag / maxSteer;
+  return (int)(speed + 0.5f);
+}
