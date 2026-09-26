@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "DEFINE.h"
 #include "ImuCapsule.h"
 #include "MotionCapsule.h"
