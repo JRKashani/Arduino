@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../Mech Lab"
+		},
+		{
+			"name": "260926-123445-megaatmega2560",
+			"path": "../../PlatformIO/Projects/260926-123445-megaatmega2560"
+		}
+	],
+	"settings": {}
+}
