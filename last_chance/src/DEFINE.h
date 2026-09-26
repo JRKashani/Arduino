@@ -219,6 +219,15 @@ const bool ULTRASONIC_DEBUG = false;
 const float ULTRASONIC_DISTANCE_SCALE = 1.01535f;
 const float ULTRASONIC_DISTANCE_OFFSET_CM = 0.70910f;
 
+// Sensor mounting offsets from the robot center (= IMU location), in cm.
+// The sensor layer applies these so downstream stage code works in
+// center-relative distances; that is why wall/light targets can be expressed
+// straight from the robot center (e.g. RIGHT_WALL_FOLLOW_TARGET_MM = 300 mm).
+const float LASER_LATERAL_OFFSET_CM = 1.2f;             // each side laser sits 1.2 cm toward its wall
+const float ULTRASONIC_FRONT_FORWARD_OFFSET_CM = 10.0f; // nose sensor is 10 cm ahead of center
+// Telemetry (live sensor dashboard) print cadence.
+const unsigned long SENSOR_TELEMETRY_INTERVAL_MS = 300UL;
+
 // LDR pins and calibration offset
 const uint8_t LDR_RIGHT_PIN = A3;
 const uint8_t LDR_LEFT_PIN = A4;

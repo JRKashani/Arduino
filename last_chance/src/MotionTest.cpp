@@ -1,13 +1,14 @@
 #include "MotionTest.h"
 #include "MotionCapsule.h"
+#include "SensorsCapsule.h"
 #include "DEFINE.h"
 
 void printMotionTestMenu() {
   Serial.println(F("\n=== MOTION CAPSULE TEST: 115200 baud ==="));
   Serial.print(F("F: forward ")); Serial.print(MOTION_TEST_DISTANCE_CM);
   Serial.println(F(" cm; L: left quarter-circle; R: right quarter-circle"));
-  Serial.println(F("S: stop/cancel; H/?: help. Send one command at a time."));
-  Serial.println(F("Timed estimates; nominal radius 60 cm. No obstacle stop."));
+  Serial.println(F("S: stop/cancel; T: toggle sensor telemetry; H/?: help."));
+  Serial.println(F("Send one command at a time. Timed estimates; no obstacle stop."));
 }
 
 void runMotionTest() {
@@ -20,6 +21,10 @@ void runMotionTest() {
       while (Serial.available()) Serial.read();
       Serial.println(F("STOPPED/CANCELLED"));
       return;
+    }
+    if (c == 'T') { // toggle telemetry without affecting motion state
+      toggleSensorTelemetry();
+      continue;
     }
     if (motionBusy()) {
       stopMotion();
