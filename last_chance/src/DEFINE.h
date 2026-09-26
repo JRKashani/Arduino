@@ -277,6 +277,11 @@ const unsigned long WALL_FOLLOW_DERIV_INTERVAL_MS = 100UL; // derivative recompu
 const float WALL_FOLLOW_DERIV_LPF_ALPHA = 0.4f; // dError low-pass (0..1, higher = less smoothing)
 // Speed scheduling: DRIVE_SPEED when steering straight, down to this at max steer.
 const int WALL_FOLLOW_MIN_SPEED = 30;
+// Outside corner / wall lost: arc right (toward the lost wall) until it returns.
+const uint8_t WALL_LOST_CONFIRM_COUNT = 3;        // consecutive gone readings before searching
+const int WALL_SEARCH_SPEED = 40;                 // base speed while searching
+const int WALL_SEARCH_STEER = 12;                 // steer magnitude toward the wall while searching
+const unsigned long WALL_SEARCH_TIMEOUT_MS = 5000UL; // ~half circle; then stop (end of wall)
 
 // Rate limit for stage decision logging (0 = log every loop iteration).
 const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;

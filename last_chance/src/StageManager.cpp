@@ -15,22 +15,85 @@ float wallPrevErrorMm = 0.0f;
 unsigned long wallPrevDerivMs = 0;
 float wallDErrFilt = 0.0f; // low-passed dError, mm/s
 
+// Stage 3 wall-lost / outside-corner state.
+enum class WallMode : uint8_t { Follow, Search, Done };
+WallMode wallMode = WallMode::Follow;
+uint8_t wallGoneCount = 0;
+unsigned long wallSearchStartMs = 0;
+
 void resetWallFollowState() {
   wallDerivInit = false;
   wallDErrFilt = 0.0f;
 }
 
+void resetWallStage() {
+  resetWallFollowState();
+  wallMode = WallMode::Follow;
+  wallGoneCount = 0;
+}
+
+// Wall counts as present only if the laser is valid and within the "gone"
+// threshold; a far reading means the beam has passed the end of the wall.
+bool wallPresent(const SensorData &d) {
+  return d.rightWallValid && d.rightWallCm * 10.0f <= (float)LASER_WALL_GONE_THRESHOLD_MM;
+}
+
+// Returns true if the caller should skip PD following this loop (searching/done).
+bool handleWallLost(const SensorData &d) {
+  const bool present = wallPresent(d);
+  const unsigned long now = millis();
+
+  if (wallMode == WallMode::Done) { stopMotion(); return true; }
+
+  if (wallMode == WallMode::Search) {
+    if (present) {
+      wallMode = WallMode::Follow;
+      wallGoneCount = 0;
+      resetWallFollowState(); // no derivative kick on reacquire
+      Serial.print(F("WALL3 wall reacquired at ")); Serial.print(d.rightWallCm, 1);
+      Serial.print(F("cm after ")); Serial.print(now - wallSearchStartMs);
+      Serial.println(F("ms -> FOLLOW"));
+      return false;
+    }
+    if (now - wallSearchStartMs >= WALL_SEARCH_TIMEOUT_MS) {
+      wallMode = WallMode::Done;
+      stopMotion();
+      Serial.println(F("WALL3 search timeout (end of wall?) -> STOP"));
+      return true;
+    }
+    // Negative command = toward the right wall (hardware-verified sign).
+    driveContinuous(WALL_SEARCH_SPEED, -WALL_SEARCH_STEER);
+    STAGE_LOG(
+      Serial.print(F("WALL3 SEARCH t=")); Serial.print(now - wallSearchStartMs);
+      Serial.print(F("ms rWall="));
+      if (d.rightWallValid) Serial.print(d.rightWallCm, 1); else Serial.print(F("--"));
+      Serial.print(F("cm steer=")); Serial.print(-WALL_SEARCH_STEER);
+      Serial.print(F(" spd=")); Serial.println(WALL_SEARCH_SPEED));
+    return true;
+  }
+
+  // Follow mode: require a few consecutive gone readings before searching.
+  if (present) { wallGoneCount = 0; return false; }
+  if (wallGoneCount < 255) wallGoneCount++;
+  if (wallGoneCount < WALL_LOST_CONFIRM_COUNT) {
+    // Not confirmed yet: keep the last command (motors unchanged) and skip PD
+    // so a glitch or far reading does not produce a huge error/derivative.
+    return true;
+  }
+  wallMode = WallMode::Search;
+  wallSearchStartMs = now;
+  resetWallFollowState();
+  Serial.print(F("WALL3 wall lost (rWall="));
+  if (d.rightWallValid) Serial.print(d.rightWallCm, 1); else Serial.print(F("--"));
+  Serial.println(F("cm) -> SEARCH right"));
+  driveContinuous(WALL_SEARCH_SPEED, -WALL_SEARCH_STEER);
+  return true;
+}
+
 // Stage 3: follow the wall on the right at RIGHT_WALL_FOLLOW_TARGET_MM (measured
 // from the robot center; the sensor layer already reports center-relative cm).
 void runWallFollow(const SensorData &d) {
-  if (!d.rightWallValid) {
-    // Lost the wall (out of range / gap): creep straight and reset the
-    // derivative so reacquiring the wall does not cause a kick.
-    driveContinuous(DRIVE_SPEED, 0);
-    resetWallFollowState();
-    STAGE_LOG(Serial.println(F("WALL3 no-wall (rightWall invalid) -> creep straight")));
-    return;
-  }
+  if (handleWallLost(d)) return; // searching for / waiting on a lost wall
   const float errorMm = d.rightWallCm * 10.0f - (float)RIGHT_WALL_FOLLOW_TARGET_MM;
 
   // Approach rate (mm/s), recomputed on a fixed cadence for a stable dt and
@@ -82,7 +145,7 @@ void startStage(uint8_t stage) {
   emergencyLatched = false;
   if (stage == STAGE_WALL) {
     current = STAGE_WALL;
-    resetWallFollowState();
+    resetWallStage();
     Serial.println(F("STAGE 3: right-wall follow @30 cm. S/X stops."));
   } else if (stage >= STAGE_OPEN && stage <= STAGE_LIGHT) {
     current = STAGE_NONE;
@@ -98,7 +161,7 @@ void stopStage() {
   if (current != STAGE_NONE) Serial.println(F("Stage stopped."));
   current = STAGE_NONE;
   emergencyLatched = false;
-  resetWallFollowState();
+  resetWallStage();
   stopMotion();
 }
 
