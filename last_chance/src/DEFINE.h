@@ -279,9 +279,18 @@ const float WALL_FOLLOW_DERIV_LPF_ALPHA = 0.4f; // dError low-pass (0..1, higher
 const int WALL_FOLLOW_MIN_SPEED = 30;
 // Outside corner / wall lost: arc right (toward the lost wall) until it returns.
 const uint8_t WALL_LOST_CONFIRM_COUNT = 3;        // consecutive gone readings before searching
+const int WALL_REACQUIRE_MM = 600;               // reacquire only at/below this (hysteresis vs gone threshold)
 const int WALL_SEARCH_SPEED = 40;                 // base speed while searching
 const int WALL_SEARCH_STEER = 12;                 // steer magnitude toward the wall while searching
 const unsigned long WALL_SEARCH_TIMEOUT_MS = 5000UL; // ~half circle; then stop (end of wall)
+// Inside corner anticipation: steer away as a wall closes in ahead.
+// front: center-relative nose distance. r45: raw slant of the right-45 sensor;
+// on a straight wall at 30 cm it reads ~(30-5.5)*sqrt(2) = ~35 cm.
+const float CORNER_FRONT_START_CM = 60.0f; // start steering away below this
+const float CORNER_FRONT_FULL_CM = 30.0f;  // full corner steer at/below this
+const float CORNER_R45_START_CM = 28.0f;
+const float CORNER_R45_FULL_CM = 15.0f;
+const int CORNER_MAX_STEER = 25;           // away-steer magnitude at full
 
 // Rate limit for stage decision logging (0 = log every loop iteration).
 const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;

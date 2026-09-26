@@ -22,4 +22,8 @@ int steerFromPD(float error, float dError, float kp, float kd,
 // down to minSpeed at |steer| >= maxSteer.
 int scaleSpeedBySteer(int baseSpeed, int minSpeed, int steer, int maxSteer);
 
+// Proximity ramp: 0 when distance >= startDist, maxOutput when distance <=
+// fullDist, linear in between (rounded). Used for "obstacle ahead" steering.
+int rampByProximity(float distance, float startDist, float fullDist, int maxOutput);
+
 #endif

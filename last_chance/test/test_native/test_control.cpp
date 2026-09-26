@@ -60,6 +60,23 @@ void test_speed_linear_midpoint(void) {
   TEST_ASSERT_EQUAL_INT(40, scaleSpeedBySteer(50, 30, 12, 24));
 }
 
+// --- Proximity ramp: start 60, full 30, max 25 ---
+
+void test_ramp_zero_when_far(void) {
+  TEST_ASSERT_EQUAL_INT(0, rampByProximity(60.0f, 60.0f, 30.0f, 25));
+  TEST_ASSERT_EQUAL_INT(0, rampByProximity(120.0f, 60.0f, 30.0f, 25));
+}
+
+void test_ramp_max_when_close(void) {
+  TEST_ASSERT_EQUAL_INT(25, rampByProximity(30.0f, 60.0f, 30.0f, 25));
+  TEST_ASSERT_EQUAL_INT(25, rampByProximity(10.0f, 60.0f, 30.0f, 25));
+}
+
+void test_ramp_linear_midpoint(void) {
+  // 45 cm is halfway => 12.5 -> 13
+  TEST_ASSERT_EQUAL_INT(13, rampByProximity(45.0f, 60.0f, 30.0f, 25));
+}
+
 int main(int, char **) {
   UNITY_BEGIN();
   RUN_TEST(test_zero_within_deadband);
@@ -73,5 +90,8 @@ int main(int, char **) {
   RUN_TEST(test_speed_full_when_straight);
   RUN_TEST(test_speed_min_at_max_steer_either_sign);
   RUN_TEST(test_speed_linear_midpoint);
+  RUN_TEST(test_ramp_zero_when_far);
+  RUN_TEST(test_ramp_max_when_close);
+  RUN_TEST(test_ramp_linear_midpoint);
   return UNITY_END();
 }

@@ -20,6 +20,7 @@ enum class WallMode : uint8_t { Follow, Search, Done };
 WallMode wallMode = WallMode::Follow;
 uint8_t wallGoneCount = 0;
 unsigned long wallSearchStartMs = 0;
+bool cornerActive = false; // inside-corner anticipation currently steering
 
 void resetWallFollowState() {
   wallDerivInit = false;
@@ -30,6 +31,7 @@ void resetWallStage() {
   resetWallFollowState();
   wallMode = WallMode::Follow;
   wallGoneCount = 0;
+  cornerActive = false;
 }
 
 // Wall counts as present only if the laser is valid and within the "gone"
@@ -46,7 +48,9 @@ bool handleWallLost(const SensorData &d) {
   if (wallMode == WallMode::Done) { stopMotion(); return true; }
 
   if (wallMode == WallMode::Search) {
-    if (present) {
+    // Hysteresis: reacquire only clearly inside the gone threshold, so a wall
+    // hovering at the threshold does not flip lost/found every loop.
+    if (d.rightWallValid && d.rightWallCm * 10.0f <= (float)WALL_REACQUIRE_MM) {
       wallMode = WallMode::Follow;
       wallGoneCount = 0;
       resetWallFollowState(); // no derivative kick on reacquire
@@ -120,7 +124,35 @@ void runWallFollow(const SensorData &d) {
   // Hardware sign (verified from the crash-into-wall logs): a POSITIVE command
   // steers the robot away from the right wall, negative steers toward it.
   // error > 0 (too far) must steer toward the wall => command = -corr.
-  const int steerCmd = -corr;
+  const int pdCmd = -corr;
+
+  // Inside corner anticipation: a wall closing in ahead (nose) or ahead-right
+  // (45 deg) adds away-steer before the side laser reaches the new segment.
+  const int cornerFront = d.frontValid
+      ? rampByProximity(d.frontCm, CORNER_FRONT_START_CM, CORNER_FRONT_FULL_CM, CORNER_MAX_STEER) : 0;
+  const int cornerR45 = d.rightDiagValid
+      ? rampByProximity(d.rightDiagCm, CORNER_R45_START_CM, CORNER_R45_FULL_CM, CORNER_MAX_STEER) : 0;
+  const int cornerAway = max(cornerFront, cornerR45);
+  // While a corner is ahead, take the more-away command so PD (e.g. its D term
+  // reacting to the turn) cannot cancel the corner turn; PD still wins if it
+  // wants even more away. With no corner, PD alone (it must be able to steer
+  // toward the wall).
+  const int steerCmd = cornerAway > 0
+      ? constrain(max(pdCmd, cornerAway), -WALL_FOLLOW_MAX_STEER, WALL_FOLLOW_MAX_STEER)
+      : pdCmd;
+
+  if (cornerAway > 0 && !cornerActive) {
+    cornerActive = true;
+    Serial.print(F("WALL3 inside corner ahead: front="));
+    if (d.frontValid) Serial.print(d.frontCm, 1); else Serial.print(F("--"));
+    Serial.print(F("cm r45="));
+    if (d.rightDiagValid) Serial.print(d.rightDiagCm, 1); else Serial.print(F("--"));
+    Serial.println(F("cm -> steer away"));
+  } else if (cornerAway == 0 && cornerActive) {
+    cornerActive = false;
+    Serial.println(F("WALL3 corner cleared -> PD only"));
+  }
+
   // Slow down while correcting hard: less sideways travel per heading change.
   const int speed = scaleSpeedBySteer(DRIVE_SPEED, WALL_FOLLOW_MIN_SPEED,
                                       steerCmd, WALL_FOLLOW_MAX_STEER);
@@ -136,7 +168,10 @@ void runWallFollow(const SensorData &d) {
     Serial.print(F(" spd=")); Serial.print(speed);
     Serial.print(F(" front="));
     if (d.frontValid) Serial.print(d.frontCm, 1); else Serial.print(F("--"));
-    Serial.println(F("cm")));
+    Serial.print(F("cm r45="));
+    if (d.rightDiagValid) Serial.print(d.rightDiagCm, 1); else Serial.print(F("--"));
+    Serial.print(F("cm pd=")); Serial.print(pdCmd);
+    Serial.print(F(" crn=")); Serial.println(cornerAway));
 }
 } // namespace
 

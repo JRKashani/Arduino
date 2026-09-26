@@ -31,3 +31,10 @@ int scaleSpeedBySteer(int baseSpeed, int minSpeed, int steer, int maxSteer) {
   const float speed = baseSpeed - (float)(baseSpeed - minSpeed) * mag / maxSteer;
   return (int)(speed + 0.5f);
 }
+
+int rampByProximity(float distance, float startDist, float fullDist, int maxOutput) {
+  if (distance >= startDist) return 0;
+  if (distance <= fullDist || startDist <= fullDist) return maxOutput;
+  const float frac = (startDist - distance) / (startDist - fullDist);
+  return (int)(frac * maxOutput + 0.5f);
+}
