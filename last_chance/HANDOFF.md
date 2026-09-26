@@ -133,10 +133,11 @@ was tested.
 last_chance/
 ├── platformio.ini          env:megaatmega2560 (robot) and env:native (host tests)
 ├── HANDOFF.md              this document
-├── README.md               OLD (still describes the Arduino-IDE workflow) — needs updating
+├── README.md               short quick-start pointing here
 ├── src/
 │   ├── main.cpp            setup()/loop(): wires all capsules together
-│   ├── DEFINE.h            ALL pins, calibration and tuning constants
+│   ├── DEFINE.h            ALL pins, sensor and tuning constants
+│   ├── MotorCalibration.h  measured motor tables + active motion profile (included by DEFINE.h)
 │   ├── SensorsCapsule.*    lasers, ultrasonics, LDRs; filtering; telemetry
 │   ├── ImuCapsule.*        ADXL335 tilt (roll/pitch) with flat-baseline calibration
 │   ├── MotionCapsule.*     motors: timed moves (F/L/R) + driveContinuous()
@@ -293,7 +294,7 @@ specific practice wall.
 ### 7.1 FIRST: test the untested last commit
 
 The newest code commit `bff3bda` (anti-chatter + dead-zone + 8 s timeout) compiles and passes
-all 18 host tests but has **not run on the robot**. Test on the 3×45 cm practice
+all host tests but has **not run on the robot**. Test on the 3×45 cm practice
 wall (outside 45° corner, then inside 45° corner):
 
 - At the outside corner, `steer` should no longer flip between +25 and −25 on
@@ -341,8 +342,7 @@ wall (outside 45° corner, then inside 45° corner):
 6. **Motor library quirk:** `Motor`'s default constructor briefly sets pins
    7/8/9 as outputs at boot; 8 and 9 are the red/green LEDs. Handle when LEDs
    are used.
-7. `README.md` still describes the old Arduino-IDE workflow — update it.
-8. Laser reads block ~30 ms each; switch to non-blocking polling if a higher
+7. Laser reads block ~30 ms each; switch to non-blocking polling if a higher
    loop rate is ever needed.
 
 ---

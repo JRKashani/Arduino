@@ -199,4 +199,3 @@ void toggleSensorTelemetry() {
   Serial.println(telemetryOn ? F("ON") : F("OFF"));
 }
 
-bool sensorTelemetryEnabled() { return telemetryOn; }

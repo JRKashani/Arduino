@@ -56,6 +56,5 @@ const SensorData &latestSensorData();
 // Live serial dashboard, off by default. Toggle with toggleSensorTelemetry();
 // when enabled, updateSensors() prints a line every SENSOR_TELEMETRY_INTERVAL_MS.
 void toggleSensorTelemetry();
-bool sensorTelemetryEnabled();
 
 #endif
