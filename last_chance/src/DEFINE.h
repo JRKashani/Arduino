@@ -268,9 +268,16 @@ const int RIGHT_WALL_SEARCH_STEP_MAX = 15;
 
 // Stage 3
 const int RIGHT_WALL_FOLLOW_TARGET_MM = 300; // 30 cm from robot center
-const float WALL_FOLLOW_GAIN = 0.05;         // steering harshness per mm of error
-const int WALL_FOLLOW_MAX_STEER = 30;        // clamp on the proportional steer
-const float WALL_FOLLOW_DEADBAND_MM = 15.0;  // no correction within this band
+const float WALL_FOLLOW_GAIN = 0.10;         // Kp: steer per mm of distance error
+const int WALL_FOLLOW_MAX_STEER = 25;        // clamp on the total (P+D) steer = max turn sharpness
+const float WALL_FOLLOW_DEADBAND_MM = 5.0;   // no P correction within this band (D still acts)
+// Derivative term: damps the weave and acts as a heading proxy (approach rate).
+const float WALL_FOLLOW_DERIV_GAIN = 0.30;   // Kd: steer per (mm/s); ~critical damping for Kp 0.10 (model: zeta~0.9)
+const unsigned long WALL_FOLLOW_DERIV_INTERVAL_MS = 100UL; // derivative recompute cadence (stable dt)
+const float WALL_FOLLOW_DERIV_LPF_ALPHA = 0.4f; // dError low-pass (0..1, higher = less smoothing)
+
+// Rate limit for stage decision logging (0 = log every loop iteration).
+const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;
 
 // Emergency recovery
 const float FRONT_EMERGENCY_STOP_CM = 20.0;

@@ -10,4 +10,11 @@
 // nearest integer and clamped to [-maxOutput, maxOutput].
 int steerFromError(float error, float gain, int maxOutput, float deadband);
 
+// Proportional-derivative steering. The P term is suppressed within +-deadband
+// (no fidgeting near target), but the D term (kd applied to dError, e.g. the
+// approach rate in mm/s) ALWAYS acts, providing damping even inside the band.
+// Output = P + kd*dError, rounded and clamped to [-maxOutput, maxOutput].
+int steerFromPD(float error, float dError, float kp, float kd,
+                int maxOutput, float deadband);
+
 #endif

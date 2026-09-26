@@ -14,3 +14,12 @@ int steerFromError(float error, float gain, int maxOutput, float deadband) {
   long rounded = (long)(out >= 0.0f ? out + 0.5f : out - 0.5f);
   return clampInt(rounded, -maxOutput, maxOutput);
 }
+
+int steerFromPD(float error, float dError, float kp, float kd,
+                int maxOutput, float deadband) {
+  const bool inBand = (error <= deadband && error >= -deadband);
+  const float p = inBand ? 0.0f : kp * error;
+  const float out = p + kd * dError;
+  long rounded = (long)(out >= 0.0f ? out + 0.5f : out - 0.5f);
+  return clampInt(rounded, -maxOutput, maxOutput);
+}
