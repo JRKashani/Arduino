@@ -277,12 +277,23 @@ const unsigned long WALL_FOLLOW_DERIV_INTERVAL_MS = 100UL; // derivative recompu
 const float WALL_FOLLOW_DERIV_LPF_ALPHA = 0.4f; // dError low-pass (0..1, higher = less smoothing)
 // Speed scheduling: DRIVE_SPEED when steering straight, down to this at max steer.
 const int WALL_FOLLOW_MIN_SPEED = 30;
+// Anti-chatter (robot physics, not track geometry):
+// Lateral speed can never exceed forward speed, so larger dErr values are
+// artefacts (e.g. the beam sweeping across a corner vertex while rotating).
+// Cap = forward speed at DRIVE_SPEED from the calibration fit (~124 mm/s).
+const float WALL_FOLLOW_DERR_MAX_MMPS =
+    10.0f * (MOTOR_SPEED_SCALE_CM_PER_SECOND_PER_PWM * DRIVE_SPEED +
+             MOTOR_SPEED_OFFSET_CM_PER_SECOND);
+const float WALL_FOLLOW_STEER_SLEW_PER_S = 150.0f; // max steer change per second
+// Steering dead zone: |steer| below ~5 barely turns the robot (friction/caster),
+// seen as parallel travel at +-4 cm offset. Added only when correcting distance.
+const int STEER_DEADZONE_COMP = 4;
 // Outside corner / wall lost: arc right (toward the lost wall) until it returns.
 const uint8_t WALL_LOST_CONFIRM_COUNT = 3;        // consecutive gone readings before searching
 const int WALL_REACQUIRE_MM = 600;               // reacquire only at/below this (hysteresis vs gone threshold)
 const int WALL_SEARCH_SPEED = 40;                 // base speed while searching
 const int WALL_SEARCH_STEER = 12;                 // steer magnitude toward the wall while searching
-const unsigned long WALL_SEARCH_TIMEOUT_MS = 5000UL; // ~half circle; then stop (end of wall)
+const unsigned long WALL_SEARCH_TIMEOUT_MS = 8000UL; // arc ~18 deg/s at 40/12 => 90 deg ~5 s; 8 s ~ 145 deg, then stop
 // Inside corner anticipation: steer away as a wall closes in ahead.
 // front: center-relative nose distance. r45: raw slant of the right-45 sensor;
 // on a straight wall at 30 cm it reads ~(30-5.5)*sqrt(2) = ~35 cm.

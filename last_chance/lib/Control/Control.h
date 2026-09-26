@@ -26,4 +26,12 @@ int scaleSpeedBySteer(int baseSpeed, int minSpeed, int steer, int maxSteer);
 // fullDist, linear in between (rounded). Used for "obstacle ahead" steering.
 int rampByProximity(float distance, float startDist, float fullDist, int maxOutput);
 
+// Slew-rate limiter: move `current` toward `target` by at most
+// maxRatePerS * dtS (rounded, at least 1 when rate > 0 and dt > 0).
+int slewLimit(int current, int target, float maxRatePerS, float dtS);
+
+// Actuator dead-zone compensation: small commands that would not overcome
+// static friction get `comp` added in their direction; 0 stays 0.
+int compensateDeadzone(int cmd, int comp);
+
 #endif

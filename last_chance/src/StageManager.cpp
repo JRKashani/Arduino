@@ -14,6 +14,9 @@ bool wallDerivInit = false;
 float wallPrevErrorMm = 0.0f;
 unsigned long wallPrevDerivMs = 0;
 float wallDErrFilt = 0.0f; // low-passed dError, mm/s
+// Slew-limiter state: last steer command actually sent and when.
+int lastSteerCmd = 0;
+unsigned long lastSteerMs = 0;
 
 // Stage 3 wall-lost / outside-corner state.
 enum class WallMode : uint8_t { Follow, Search, Done };
@@ -29,6 +32,8 @@ void resetWallFollowState() {
 
 void resetWallStage() {
   resetWallFollowState();
+  lastSteerCmd = 0;
+  lastSteerMs = millis();
   wallMode = WallMode::Follow;
   wallGoneCount = 0;
   cornerActive = false;
@@ -67,6 +72,7 @@ bool handleWallLost(const SensorData &d) {
     }
     // Negative command = toward the right wall (hardware-verified sign).
     driveContinuous(WALL_SEARCH_SPEED, -WALL_SEARCH_STEER);
+    lastSteerCmd = -WALL_SEARCH_STEER; lastSteerMs = now;
     STAGE_LOG(
       Serial.print(F("WALL3 SEARCH t=")); Serial.print(now - wallSearchStartMs);
       Serial.print(F("ms rWall="));
@@ -91,6 +97,7 @@ bool handleWallLost(const SensorData &d) {
   if (d.rightWallValid) Serial.print(d.rightWallCm, 1); else Serial.print(F("--"));
   Serial.println(F("cm) -> SEARCH right"));
   driveContinuous(WALL_SEARCH_SPEED, -WALL_SEARCH_STEER);
+  lastSteerCmd = -WALL_SEARCH_STEER; lastSteerMs = now;
   return true;
 }
 
@@ -111,7 +118,8 @@ void runWallFollow(const SensorData &d) {
     wallDErrFilt = 0.0f;
   } else if (now - wallPrevDerivMs >= WALL_FOLLOW_DERIV_INTERVAL_MS) {
     const float dt = (now - wallPrevDerivMs) / 1000.0f;
-    const float raw = (errorMm - wallPrevErrorMm) / dt;
+    const float raw = constrain((errorMm - wallPrevErrorMm) / dt,
+                                -WALL_FOLLOW_DERR_MAX_MMPS, WALL_FOLLOW_DERR_MAX_MMPS);
     wallDErrFilt = WALL_FOLLOW_DERIV_LPF_ALPHA * raw +
                    (1.0f - WALL_FOLLOW_DERIV_LPF_ALPHA) * wallDErrFilt;
     wallPrevErrorMm = errorMm;
@@ -124,7 +132,10 @@ void runWallFollow(const SensorData &d) {
   // Hardware sign (verified from the crash-into-wall logs): a POSITIVE command
   // steers the robot away from the right wall, negative steers toward it.
   // error > 0 (too far) must steer toward the wall => command = -corr.
-  const int pdCmd = -corr;
+  // Dead-zone compensation only while actually correcting distance, so the
+  // robot does not dither around the target from D-term noise.
+  const bool correcting = fabs(errorMm) > WALL_FOLLOW_DEADBAND_MM;
+  const int pdCmd = correcting ? compensateDeadzone(-corr, STEER_DEADZONE_COMP) : -corr;
 
   // Inside corner anticipation: a wall closing in ahead (nose) or ahead-right
   // (45 deg) adds away-steer before the side laser reaches the new segment.
@@ -137,9 +148,13 @@ void runWallFollow(const SensorData &d) {
   // reacting to the turn) cannot cancel the corner turn; PD still wins if it
   // wants even more away. With no corner, PD alone (it must be able to steer
   // toward the wall).
-  const int steerCmd = cornerAway > 0
-      ? constrain(max(pdCmd, cornerAway), -WALL_FOLLOW_MAX_STEER, WALL_FOLLOW_MAX_STEER)
-      : pdCmd;
+  const int targetCmd = constrain(cornerAway > 0 ? max(pdCmd, cornerAway) : pdCmd,
+                                  -WALL_FOLLOW_MAX_STEER, WALL_FOLLOW_MAX_STEER);
+  // Slew limit: no bang-bang flips between +-max within a loop or two.
+  const int steerCmd = slewLimit(lastSteerCmd, targetCmd, WALL_FOLLOW_STEER_SLEW_PER_S,
+                                 (now - lastSteerMs) / 1000.0f);
+  lastSteerCmd = steerCmd;
+  lastSteerMs = now;
 
   if (cornerAway > 0 && !cornerActive) {
     cornerActive = true;
@@ -170,7 +185,8 @@ void runWallFollow(const SensorData &d) {
     if (d.frontValid) Serial.print(d.frontCm, 1); else Serial.print(F("--"));
     Serial.print(F("cm r45="));
     if (d.rightDiagValid) Serial.print(d.rightDiagCm, 1); else Serial.print(F("--"));
-    Serial.print(F("cm pd=")); Serial.print(pdCmd);
+    Serial.print(F("cm tgt=")); Serial.print(targetCmd);
+    Serial.print(F(" pd=")); Serial.print(pdCmd);
     Serial.print(F(" crn=")); Serial.println(cornerAway));
 }
 } // namespace

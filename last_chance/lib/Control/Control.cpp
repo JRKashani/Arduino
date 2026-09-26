@@ -38,3 +38,18 @@ int rampByProximity(float distance, float startDist, float fullDist, int maxOutp
   const float frac = (startDist - distance) / (startDist - fullDist);
   return (int)(frac * maxOutput + 0.5f);
 }
+
+int slewLimit(int current, int target, float maxRatePerS, float dtS) {
+  if (maxRatePerS <= 0.0f || dtS <= 0.0f) return current;
+  int step = (int)(maxRatePerS * dtS + 0.5f);
+  if (step < 1) step = 1;
+  if (target > current + step) return current + step;
+  if (target < current - step) return current - step;
+  return target;
+}
+
+int compensateDeadzone(int cmd, int comp) {
+  if (cmd > 0) return cmd + comp;
+  if (cmd < 0) return cmd - comp;
+  return 0;
+}

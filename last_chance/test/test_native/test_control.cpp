@@ -77,6 +77,30 @@ void test_ramp_linear_midpoint(void) {
   TEST_ASSERT_EQUAL_INT(13, rampByProximity(45.0f, 60.0f, 30.0f, 25));
 }
 
+// --- Slew limiter ---
+
+void test_slew_limits_step(void) {
+  // 150/s over 0.1 s => step 15
+  TEST_ASSERT_EQUAL_INT(15, slewLimit(0, 25, 150.0f, 0.1f));
+  TEST_ASSERT_EQUAL_INT(-15, slewLimit(0, -25, 150.0f, 0.1f));
+}
+
+void test_slew_reaches_close_target(void) {
+  TEST_ASSERT_EQUAL_INT(10, slewLimit(0, 10, 150.0f, 0.1f));
+}
+
+void test_slew_min_one_step(void) {
+  TEST_ASSERT_EQUAL_INT(1, slewLimit(0, 25, 150.0f, 0.001f));
+}
+
+// --- Dead-zone compensation ---
+
+void test_deadzone_comp(void) {
+  TEST_ASSERT_EQUAL_INT(0, compensateDeadzone(0, 4));
+  TEST_ASSERT_EQUAL_INT(7, compensateDeadzone(3, 4));
+  TEST_ASSERT_EQUAL_INT(-7, compensateDeadzone(-3, 4));
+}
+
 int main(int, char **) {
   UNITY_BEGIN();
   RUN_TEST(test_zero_within_deadband);
@@ -93,5 +117,9 @@ int main(int, char **) {
   RUN_TEST(test_ramp_zero_when_far);
   RUN_TEST(test_ramp_max_when_close);
   RUN_TEST(test_ramp_linear_midpoint);
+  RUN_TEST(test_slew_limits_step);
+  RUN_TEST(test_slew_reaches_close_target);
+  RUN_TEST(test_slew_min_one_step);
+  RUN_TEST(test_deadzone_comp);
   return UNITY_END();
 }
