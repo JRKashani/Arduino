@@ -55,12 +55,14 @@ const uint8_t ACCEL_X_PIN = A2;
 const uint8_t ACCEL_Y_PIN = A1;
 const uint8_t ACCEL_Z_PIN = A0;
 const uint8_t ACCEL_REF_3V3_PIN = A5;
-const float X_ZERO_RATIO = 0.5143f;
-const float Y_ZERO_RATIO = 0.5070f;
-const float Z_ZERO_RATIO = 0.5068f;
-const float X_RATIO_PER_G = 0.1050f;
-const float Y_RATIO_PER_G = 0.1020f;
-const float Z_RATIO_PER_G = 0.0988f;
+// Replacement sensor: provisional six-face calibration, validation skipped by user.
+// Source and previous values: docs/imu-calibration-replacement-2026-10-11.md.
+const float X_ZERO_RATIO = 0.49385493f;
+const float Y_ZERO_RATIO = 0.50038849f;
+const float Z_ZERO_RATIO = 0.49238816f;
+const float X_RATIO_PER_G = 0.10187030f;
+const float Y_RATIO_PER_G = 0.10271054f;
+const float Z_RATIO_PER_G = 0.10215843f;
 const int ACCEL_CALIBRATION_SAMPLES = 100;
 const unsigned long ACCEL_CALIBRATION_SAMPLE_DELAY_MS = 10;
 const unsigned long IMU_PRINT_INTERVAL_MS = 200UL;

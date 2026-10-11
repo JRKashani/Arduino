@@ -1,0 +1,94 @@
+{
+  "model": "Independent normalized ADC offsets/scales with explicit signed axis map and fixed mount rotation",
+  "assumption": "Phone surface and robot datum agree. Unmodeled chassis/mount offsets may be absorbed by fitted offsets; this is an installed-system proposal.",
+  "training_placements": 20,
+  "validation_placements": 20,
+  "training_trial_ids": [
+    5,
+    6,
+    7,
+    8,
+    15,
+    16,
+    17,
+    18,
+    24,
+    25,
+    26,
+    27,
+    34,
+    35,
+    36,
+    37,
+    43,
+    44,
+    45,
+    46
+  ],
+  "validation_trial_ids": [
+    9,
+    10,
+    11,
+    12,
+    19,
+    20,
+    21,
+    22,
+    28,
+    29,
+    30,
+    31,
+    38,
+    39,
+    40,
+    41,
+    47,
+    48,
+    49,
+    50
+  ],
+  "axes": {
+    "x": {
+      "usable": true,
+      "zero": 0.49480708372758625,
+      "per_g": 0.10238311712628222,
+      "span_g": 1.1256523278103843,
+      "condition": 4.380520123580541
+    },
+    "y": {
+      "usable": true,
+      "zero": 0.5073532555851168,
+      "per_g": 0.10116834840642203,
+      "span_g": 1.1256523278103843,
+      "condition": 4.380520123580541
+    },
+    "z": {
+      "usable": false,
+      "reason": "Insufficient axis gravity coverage",
+      "span_g": 0.17071126774061562,
+      "condition": 30.474358511991458
+    }
+  },
+  "validation": {
+    "current_vector_rms_deg": 4.211454914743695,
+    "candidate_vector_rms_deg": 0.7525367350600045,
+    "current_max_vector_error_deg": 5.642227398012022,
+    "candidate_max_vector_error_deg": 1.9489214576907397,
+    "current_roll_rms_deg": 4.3000351257100995,
+    "candidate_roll_rms_deg": 0.6466738520654182,
+    "current_pitch_rms_deg": 0.7220714314832435,
+    "candidate_pitch_rms_deg": 0.42951298257717896
+  },
+  "recommended": false,
+  "axes_status": "inferred",
+  "active_calibration_changed": false,
+  "candidate_constants": {
+    "x_zero": 0.49480708372758625,
+    "y_zero": 0.5073532555851168,
+    "z_zero": 0.4923882,
+    "x_per_g": 0.10238311712628222,
+    "y_per_g": 0.10116834840642203,
+    "z_per_g": 0.1021584
+  },
+  "held_out_improvement": true
+}

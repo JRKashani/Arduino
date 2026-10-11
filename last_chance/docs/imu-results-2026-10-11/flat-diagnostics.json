@@ -1,0 +1,265 @@
+{
+  "checks": [
+    {
+      "trial_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "surface": "LEVEL_START",
+      "roll_deg": 3.917169215,
+      "pitch_deg": 0.53483461,
+      "magnitude_g": 1.00539606,
+      "reference_adc": 702.26,
+      "axis_adc": [
+        347.498,
+        356.368,
+        417.723
+      ],
+      "ratios": [
+        0.4948316313588203,
+        0.5074626537994171,
+        0.5948309140853253
+      ]
+    },
+    {
+      "trial_ids": [
+        13,
+        14
+      ],
+      "surface": "LEVEL_BETWEEN_S1",
+      "roll_deg": 3.93290204,
+      "pitch_deg": 0.74757173,
+      "magnitude_g": 1.007452965,
+      "reference_adc": 702.817,
+      "axis_adc": [
+        348.046,
+        356.682,
+        418.19500000000005
+      ],
+      "ratios": [
+        0.4952202483779549,
+        0.5075077298526125,
+        0.5950318351829545
+      ]
+    },
+    {
+      "trial_ids": [
+        23
+      ],
+      "surface": "LEVEL_BETWEEN_S2",
+      "roll_deg": 3.90050004,
+      "pitch_deg": 0.8291906,
+      "magnitude_g": 1.008619082,
+      "reference_adc": 702.726,
+      "axis_adc": [
+        348.104,
+        356.6,
+        418.226
+      ],
+      "ratios": [
+        0.49536692754964207,
+        0.5074568848455565,
+        0.5951529648880071
+      ]
+    },
+    {
+      "trial_ids": [
+        33
+      ],
+      "surface": "LEVEL_BETWEEN_S3",
+      "roll_deg": 4.18753914,
+      "pitch_deg": 0.88794732,
+      "magnitude_g": 1.007067752,
+      "reference_adc": 702.636,
+      "axis_adc": [
+        348.118,
+        356.898,
+        418.052
+      ],
+      "ratios": [
+        0.49544613358715395,
+        0.5079418280829375,
+        0.594976935112613
+      ]
+    },
+    {
+      "trial_ids": [
+        42
+      ],
+      "surface": "LEVEL_BETWEEN_S4",
+      "roll_deg": 4.36190064,
+      "pitch_deg": 1.16550342,
+      "magnitude_g": 1.007250794,
+      "reference_adc": 702.642,
+      "axis_adc": [
+        348.47,
+        357.122,
+        418.046
+      ],
+      "ratios": [
+        0.4959426572875288,
+        0.5082562922866296,
+        0.5949632255112819
+      ]
+    },
+    {
+      "trial_ids": [
+        51
+      ],
+      "surface": "LEVEL_END",
+      "roll_deg": 3.99502064,
+      "pitch_deg": 0.84989056,
+      "magnitude_g": 1.0069563879999999,
+      "reference_adc": 701.97,
+      "axis_adc": [
+        347.74,
+        356.316,
+        417.666
+      ],
+      "ratios": [
+        0.49537754167358794,
+        0.5075947348880196,
+        0.5949914383022304
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "roll_delta_deg": 0.015732824999986406,
+      "pitch_delta_deg": 0.2127371200000141,
+      "magnitude_delta_g": 0.0020569049999998867,
+      "reference_adc_delta": 0.5570000000000164,
+      "axis_adc_deltas": [
+        0.5480000000000018,
+        0.3140000000000214,
+        0.47200000000003683
+      ],
+      "ratio_deltas": [
+        0.0003886170191346183,
+        4.507605319536978e-05,
+        0.00020092109762925858
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "current_trial_ids": [
+        13,
+        14
+      ],
+      "previous_surface": "LEVEL_START",
+      "current_surface": "LEVEL_BETWEEN_S1"
+    },
+    {
+      "roll_delta_deg": -0.032401999999990494,
+      "pitch_delta_deg": 0.08161886999999979,
+      "magnitude_delta_g": 0.001166117000000133,
+      "reference_adc_delta": -0.09100000000000819,
+      "axis_adc_deltas": [
+        0.057999999999992724,
+        -0.08199999999999363,
+        0.03099999999994907
+      ],
+      "ratio_deltas": [
+        0.0001466791716871474,
+        -5.084500705598849e-05,
+        0.00012112970505251397
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        13,
+        14
+      ],
+      "current_trial_ids": [
+        23
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S1",
+      "current_surface": "LEVEL_BETWEEN_S2"
+    },
+    {
+      "roll_delta_deg": 0.287039099999987,
+      "pitch_delta_deg": 0.05875671999999099,
+      "magnitude_delta_g": -0.001551330000000073,
+      "reference_adc_delta": -0.09000000000003183,
+      "axis_adc_deltas": [
+        0.014000000000010004,
+        0.2980000000000018,
+        -0.17399999999997817
+      ],
+      "ratio_deltas": [
+        7.920603751188082e-05,
+        0.0004849432373810192,
+        -0.00017602977539410425
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        23
+      ],
+      "current_trial_ids": [
+        33
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S2",
+      "current_surface": "LEVEL_BETWEEN_S3"
+    },
+    {
+      "roll_delta_deg": 0.1743615000000034,
+      "pitch_delta_deg": 0.2775560999999982,
+      "magnitude_delta_g": 0.00018304199999996662,
+      "reference_adc_delta": 0.0060000000000854925,
+      "axis_adc_deltas": [
+        0.3520000000000323,
+        0.22399999999998954,
+        -0.006000000000028649
+      ],
+      "ratio_deltas": [
+        0.0004965237003748402,
+        0.0003144642036920775,
+        -1.370960133106891e-05
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        33
+      ],
+      "current_trial_ids": [
+        42
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S3",
+      "current_surface": "LEVEL_BETWEEN_S4"
+    },
+    {
+      "roll_delta_deg": -0.366880000000009,
+      "pitch_delta_deg": -0.31561285999998745,
+      "magnitude_delta_g": -0.0002944060000000803,
+      "reference_adc_delta": -0.6720000000000255,
+      "axis_adc_deltas": [
+        -0.7300000000000182,
+        -0.80600000000004,
+        -0.37999999999999545
+      ],
+      "ratio_deltas": [
+        -0.0005651156139408475,
+        -0.0006615573986099577,
+        2.8212790948556332e-05
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        42
+      ],
+      "current_trial_ids": [
+        51
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S4",
+      "current_surface": "LEVEL_END"
+    }
+  ]
+}

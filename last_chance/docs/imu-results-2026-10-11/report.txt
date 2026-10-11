@@ -1,0 +1,27 @@
+IMU tilt mission report
+Simulated data: False
+Accepted slope placements: 40/40
+Phone convention: axis-elevation; axes verified: False; axes inferred: True
+Level drift (last minus first): {'roll': -0.0668778433555417, 'pitch': 0.30402171587363114}
+Reference comparison vector RMS (deg): 4.180113809359874
+Within +/-3 deg on both axes versus phone reference under selected assumptions: 1 / 40 (None means unassessed)
+Fitting: 20 loop-1 placements; validation: 20 loop-2 placements.
+Candidate passes held-out improvement check: True
+Candidate recommended with verified axes: False
+Active robot calibration was not modified.
+
+Recorded calibration status: provisional_validation_skipped_by_user
+Axis mapping and phone convention are analysis assumptions inferred from measurements, not physically verified. Comparisons and fitted constants are provisional; no candidate is recommended for application.
+
+Phone disagreement is a repeatability indicator, not absolute reference accuracy.
+Loop 2 can share phone references with loop 1; this does not establish independent absolute accuracy.
+Kept repeat captures are averaged with equal weight per capture, then each placement gets equal fit weight.
+The +/-3 deg per-axis comparison target is not guaranteed absolute accuracy; phone reference uncertainty and mounting bias still apply.
+Flat changes and repeat disagreement thresholds (3 deg or 0.1 g) assume the same physical pose; they are diagnostic defaults, not sensor specifications.
+Unfitted axes retain existing constants from the first training placement.
+No automatic mount estimate or full cross-axis fit is inferred from narrow slope coverage.
+No requested-angle grid is fabricated from household slopes.
+Axis X: {'usable': True, 'zero': 0.49480708372758625, 'per_g': 0.10238311712628222, 'span_g': 1.1256523278103843, 'condition': 4.380520123580541}
+Axis Y: {'usable': True, 'zero': 0.5073532555851168, 'per_g': 0.10116834840642203, 'span_g': 1.1256523278103843, 'condition': 4.380520123580541}
+Axis Z: {'usable': False, 'reason': 'Insufficient axis gravity coverage', 'span_g': 0.17071126774061562, 'condition': 30.474358511991458}
+Held-out comparison: {'current_vector_rms_deg': 4.211454914743695, 'candidate_vector_rms_deg': 0.7525367350600045, 'current_max_vector_error_deg': 5.642227398012022, 'candidate_max_vector_error_deg': 1.9489214576907397, 'current_roll_rms_deg': 4.3000351257100995, 'candidate_roll_rms_deg': 0.6466738520654182, 'current_pitch_rms_deg': 0.7220714314832435, 'candidate_pitch_rms_deg': 0.42951298257717896}

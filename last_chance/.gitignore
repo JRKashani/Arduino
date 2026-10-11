@@ -1,2 +1,5 @@
 build/
 .pio/
+.venv/
+__pycache__/
+imu_tilt_sessions/

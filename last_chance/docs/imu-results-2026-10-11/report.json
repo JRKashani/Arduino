@@ -1,0 +1,436 @@
+{
+  "schema": 1,
+  "session_id": "e55aff64a86441e1a27268bfdc900014",
+  "simulated": false,
+  "options": {
+    "command": "analyze",
+    "session": "imu_tilt_sessions\\20261011T091553_164906Z",
+    "phone_convention": "axis-elevation",
+    "up_sign": 1,
+    "right_sign": 1,
+    "sensor_map": "x,-y,z",
+    "axes_verified": false,
+    "axes_inferred": true,
+    "mount_roll": 0,
+    "mount_pitch": 0,
+    "mount_yaw": 0,
+    "max_std": 3.0,
+    "max_drift": 3.0,
+    "max_reference_disagreement": 3.0,
+    "minimum_span": 0.2,
+    "no_plots": false
+  },
+  "calibration_info": {
+    "status": "provisional_validation_skipped_by_user",
+    "source_session": "imu_tilt_sessions/20261011T085956_819855Z_six_face",
+    "sensor": "replacement ADXL335, direct ground jumper",
+    "candidate_constants": {
+      "x_zero": 0.49385493463403934,
+      "y_zero": 0.5003884896706072,
+      "z_zero": 0.4923881577088629,
+      "x_per_g": 0.10187029523592023,
+      "y_per_g": 0.10271053839681996,
+      "z_per_g": 0.10215842517472598
+    },
+    "previous_constants": {
+      "x_zero": 0.50290918,
+      "y_zero": 0.49537615,
+      "z_zero": 0.50094098,
+      "x_per_g": 0.10327006,
+      "y_per_g": 0.10375069,
+      "z_per_g": 0.0980555
+    },
+    "training_max_vector_error_g": 0.09318820334022763,
+    "training_passed": true,
+    "validation_performed": false,
+    "purpose": "Collect five household slopes with phone estimates, then assess calibration using those measurements."
+  },
+  "accepted_slope_placements": 40,
+  "expected_slope_placements": 40,
+  "level_drift_deg": {
+    "roll": -0.0668778433555417,
+    "pitch": 0.30402171587363114
+  },
+  "warnings": [
+    "Recorded calibration status: provisional_validation_skipped_by_user",
+    "Axis mapping and phone convention are analysis assumptions inferred from measurements, not physically verified. Comparisons and fitted constants are provisional; no candidate is recommended for application."
+  ],
+  "flat_checks": [
+    {
+      "trial_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "surface": "LEVEL_START",
+      "roll_deg": 3.917169215,
+      "pitch_deg": 0.53483461,
+      "magnitude_g": 1.00539606,
+      "reference_adc": 702.26,
+      "axis_adc": [
+        347.498,
+        356.368,
+        417.723
+      ],
+      "ratios": [
+        0.4948316313588203,
+        0.5074626537994171,
+        0.5948309140853253
+      ]
+    },
+    {
+      "trial_ids": [
+        13,
+        14
+      ],
+      "surface": "LEVEL_BETWEEN_S1",
+      "roll_deg": 3.93290204,
+      "pitch_deg": 0.74757173,
+      "magnitude_g": 1.007452965,
+      "reference_adc": 702.817,
+      "axis_adc": [
+        348.046,
+        356.682,
+        418.19500000000005
+      ],
+      "ratios": [
+        0.4952202483779549,
+        0.5075077298526125,
+        0.5950318351829545
+      ]
+    },
+    {
+      "trial_ids": [
+        23
+      ],
+      "surface": "LEVEL_BETWEEN_S2",
+      "roll_deg": 3.90050004,
+      "pitch_deg": 0.8291906,
+      "magnitude_g": 1.008619082,
+      "reference_adc": 702.726,
+      "axis_adc": [
+        348.104,
+        356.6,
+        418.226
+      ],
+      "ratios": [
+        0.49536692754964207,
+        0.5074568848455565,
+        0.5951529648880071
+      ]
+    },
+    {
+      "trial_ids": [
+        33
+      ],
+      "surface": "LEVEL_BETWEEN_S3",
+      "roll_deg": 4.18753914,
+      "pitch_deg": 0.88794732,
+      "magnitude_g": 1.007067752,
+      "reference_adc": 702.636,
+      "axis_adc": [
+        348.118,
+        356.898,
+        418.052
+      ],
+      "ratios": [
+        0.49544613358715395,
+        0.5079418280829375,
+        0.594976935112613
+      ]
+    },
+    {
+      "trial_ids": [
+        42
+      ],
+      "surface": "LEVEL_BETWEEN_S4",
+      "roll_deg": 4.36190064,
+      "pitch_deg": 1.16550342,
+      "magnitude_g": 1.007250794,
+      "reference_adc": 702.642,
+      "axis_adc": [
+        348.47,
+        357.122,
+        418.046
+      ],
+      "ratios": [
+        0.4959426572875288,
+        0.5082562922866296,
+        0.5949632255112819
+      ]
+    },
+    {
+      "trial_ids": [
+        51
+      ],
+      "surface": "LEVEL_END",
+      "roll_deg": 3.99502064,
+      "pitch_deg": 0.84989056,
+      "magnitude_g": 1.0069563879999999,
+      "reference_adc": 701.97,
+      "axis_adc": [
+        347.74,
+        356.316,
+        417.666
+      ],
+      "ratios": [
+        0.49537754167358794,
+        0.5075947348880196,
+        0.5949914383022304
+      ]
+    }
+  ],
+  "flat_comparisons": [
+    {
+      "roll_delta_deg": 0.015732824999986406,
+      "pitch_delta_deg": 0.2127371200000141,
+      "magnitude_delta_g": 0.0020569049999998867,
+      "reference_adc_delta": 0.5570000000000164,
+      "axis_adc_deltas": [
+        0.5480000000000018,
+        0.3140000000000214,
+        0.47200000000003683
+      ],
+      "ratio_deltas": [
+        0.0003886170191346183,
+        4.507605319536978e-05,
+        0.00020092109762925858
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "current_trial_ids": [
+        13,
+        14
+      ],
+      "previous_surface": "LEVEL_START",
+      "current_surface": "LEVEL_BETWEEN_S1"
+    },
+    {
+      "roll_delta_deg": -0.032401999999990494,
+      "pitch_delta_deg": 0.08161886999999979,
+      "magnitude_delta_g": 0.001166117000000133,
+      "reference_adc_delta": -0.09100000000000819,
+      "axis_adc_deltas": [
+        0.057999999999992724,
+        -0.08199999999999363,
+        0.03099999999994907
+      ],
+      "ratio_deltas": [
+        0.0001466791716871474,
+        -5.084500705598849e-05,
+        0.00012112970505251397
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        13,
+        14
+      ],
+      "current_trial_ids": [
+        23
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S1",
+      "current_surface": "LEVEL_BETWEEN_S2"
+    },
+    {
+      "roll_delta_deg": 0.287039099999987,
+      "pitch_delta_deg": 0.05875671999999099,
+      "magnitude_delta_g": -0.001551330000000073,
+      "reference_adc_delta": -0.09000000000003183,
+      "axis_adc_deltas": [
+        0.014000000000010004,
+        0.2980000000000018,
+        -0.17399999999997817
+      ],
+      "ratio_deltas": [
+        7.920603751188082e-05,
+        0.0004849432373810192,
+        -0.00017602977539410425
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        23
+      ],
+      "current_trial_ids": [
+        33
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S2",
+      "current_surface": "LEVEL_BETWEEN_S3"
+    },
+    {
+      "roll_delta_deg": 0.1743615000000034,
+      "pitch_delta_deg": 0.2775560999999982,
+      "magnitude_delta_g": 0.00018304199999996662,
+      "reference_adc_delta": 0.0060000000000854925,
+      "axis_adc_deltas": [
+        0.3520000000000323,
+        0.22399999999998954,
+        -0.006000000000028649
+      ],
+      "ratio_deltas": [
+        0.0004965237003748402,
+        0.0003144642036920775,
+        -1.370960133106891e-05
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        33
+      ],
+      "current_trial_ids": [
+        42
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S3",
+      "current_surface": "LEVEL_BETWEEN_S4"
+    },
+    {
+      "roll_delta_deg": -0.366880000000009,
+      "pitch_delta_deg": -0.31561285999998745,
+      "magnitude_delta_g": -0.0002944060000000803,
+      "reference_adc_delta": -0.6720000000000255,
+      "axis_adc_deltas": [
+        -0.7300000000000182,
+        -0.80600000000004,
+        -0.37999999999999545
+      ],
+      "ratio_deltas": [
+        -0.0005651156139408475,
+        -0.0006615573986099577,
+        2.8212790948556332e-05
+      ],
+      "changed": false,
+      "flat_repeat_disagreement": false,
+      "previous_trial_ids": [
+        42
+      ],
+      "current_trial_ids": [
+        51
+      ],
+      "previous_surface": "LEVEL_BETWEEN_S4",
+      "current_surface": "LEVEL_END"
+    }
+  ],
+  "current_vector_rms_deg": 4.180113809359874,
+  "tilt_tolerance_deg": 3.0,
+  "placements_compared": 40,
+  "placements_within_tolerance": 1,
+  "calibration_proposal": {
+    "model": "Independent normalized ADC offsets/scales with explicit signed axis map and fixed mount rotation",
+    "assumption": "Phone surface and robot datum agree. Unmodeled chassis/mount offsets may be absorbed by fitted offsets; this is an installed-system proposal.",
+    "training_placements": 20,
+    "validation_placements": 20,
+    "training_trial_ids": [
+      5,
+      6,
+      7,
+      8,
+      15,
+      16,
+      17,
+      18,
+      24,
+      25,
+      26,
+      27,
+      34,
+      35,
+      36,
+      37,
+      43,
+      44,
+      45,
+      46
+    ],
+    "validation_trial_ids": [
+      9,
+      10,
+      11,
+      12,
+      19,
+      20,
+      21,
+      22,
+      28,
+      29,
+      30,
+      31,
+      38,
+      39,
+      40,
+      41,
+      47,
+      48,
+      49,
+      50
+    ],
+    "axes": {
+      "x": {
+        "usable": true,
+        "zero": 0.49480708372758625,
+        "per_g": 0.10238311712628222,
+        "span_g": 1.1256523278103843,
+        "condition": 4.380520123580541
+      },
+      "y": {
+        "usable": true,
+        "zero": 0.5073532555851168,
+        "per_g": 0.10116834840642203,
+        "span_g": 1.1256523278103843,
+        "condition": 4.380520123580541
+      },
+      "z": {
+        "usable": false,
+        "reason": "Insufficient axis gravity coverage",
+        "span_g": 0.17071126774061562,
+        "condition": 30.474358511991458
+      }
+    },
+    "validation": {
+      "current_vector_rms_deg": 4.211454914743695,
+      "candidate_vector_rms_deg": 0.7525367350600045,
+      "current_max_vector_error_deg": 5.642227398012022,
+      "candidate_max_vector_error_deg": 1.9489214576907397,
+      "current_roll_rms_deg": 4.3000351257100995,
+      "candidate_roll_rms_deg": 0.6466738520654182,
+      "current_pitch_rms_deg": 0.7220714314832435,
+      "candidate_pitch_rms_deg": 0.42951298257717896
+    },
+    "recommended": false,
+    "axes_status": "inferred",
+    "active_calibration_changed": false,
+    "candidate_constants": {
+      "x_zero": 0.49480708372758625,
+      "y_zero": 0.5073532555851168,
+      "z_zero": 0.4923882,
+      "x_per_g": 0.10238311712628222,
+      "y_per_g": 0.10116834840642203,
+      "z_per_g": 0.1021584
+    },
+    "held_out_improvement": true
+  },
+  "limits": [
+    "Phone disagreement is a repeatability indicator, not absolute reference accuracy.",
+    "Loop 2 can share phone references with loop 1; this does not establish independent absolute accuracy.",
+    "Kept repeat captures are averaged with equal weight per capture, then each placement gets equal fit weight.",
+    "The +/-3 deg per-axis comparison target is not guaranteed absolute accuracy; phone reference uncertainty and mounting bias still apply.",
+    "Flat changes and repeat disagreement thresholds (3 deg or 0.1 g) assume the same physical pose; they are diagnostic defaults, not sensor specifications.",
+    "Unfitted axes retain existing constants from the first training placement.",
+    "No automatic mount estimate or full cross-axis fit is inferred from narrow slope coverage.",
+    "No requested-angle grid is fabricated from household slopes."
+  ],
+  "source_sha256": {
+    "session.json": "cfdc38f38e0c8e0bc1c5e37bd6973c57b109a60dbe220808282a47d851c860a0",
+    "events-c8816b2eabe0468ca51b313c0240cc50.jsonl": "11bfcbfaf7ea9c5528fe69860c2e62695f0e9f09ed70d1f110c23741ebbee89c",
+    "events-e5d5ef5113d74d2b983b5b664ca7e320.jsonl": "1c2ba49ae88631712b8522d221fc8c7025770c7f331f060cb03c18718a662168",
+    "serial-c8816b2eabe0468ca51b313c0240cc50.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "serial-e5d5ef5113d74d2b983b5b664ca7e320.log": "8acc9d5fcc314e0b7e83c956ef82520489055a8d055865c781c78cedc83ff7e0"
+  }
+}
