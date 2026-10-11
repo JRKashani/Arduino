@@ -47,5 +47,6 @@ and [measured-angle tables](imu-results-2026-10-11/tables/measured-tables.md)
 are archived in this repository. All 40 planned placements were accepted; all
 20 loop pairs agreed within 3 degrees per axis. The phone-derived fit remains an
 unapplied proposal with inferred axis mapping and phone convention. The active
-constants above remain unchanged. Full acquisition logs stay locally under
-`imu_tilt_sessions/`; the archive contains derived measurements and source hashes.
+constants above remain unchanged. The [25,500-sample CSV](imu-results-2026-10-11/samples.csv)
+is archived with the derived measurements and source hashes. Original serial and
+event logs stay locally under `imu_tilt_sessions/`.

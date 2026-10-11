@@ -34,4 +34,9 @@ Both loops share the same phone reference for each surface. No after-run phone b
 
 ![Comparison and flat checks](calibration-review.png)
 
-Full details: [report](report.txt), [proposed constants](calibration-proposal.json), [placement measurements](placements.csv).
+Full details: [report](report.txt), [proposed constants](calibration-proposal.json), [placement measurements](placements.csv), [all 25,500 samples](samples.csv).
+
+The sample CSV includes all 51 capture attempts, including repeats, with raw
+X/Y/Z and supply-reference ADC counts, acceleration in g, angles, timestamps,
+trial IDs and inclusion status. It is copied unchanged from the completed analysis;
+it uses the acquisition calibration, not the proposed phone-based fit.

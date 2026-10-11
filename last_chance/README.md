@@ -11,6 +11,8 @@ calibration and wiring are documented in
 The [five-slope results](docs/imu-results-2026-10-11/comparison-review.md) and
 [raw ADC / g tables](docs/imu-results-2026-10-11/tables/measured-tables.md)
 use that calibration; the phone-derived proposal has not been applied.
+The [full sample CSV](docs/imu-results-2026-10-11/samples.csv) contains all
+25,500 samples, including raw ADC readings and calibrated acceleration in g.
 
 Robot firmware for the Braude mechatronics final project (Arduino Mega 2560),
 built with PlatformIO. **Read [HANDOFF.md](HANDOFF.md)** for the full project
