@@ -1,0 +1,86 @@
+{"kind": "connection", "utc": "2026-10-11T15:12:44.710612+00:00", "firmware_version": "1.2.0", "firmware_config": {"US_SCALE": "1.015350", "US_OFFSET_CM": "0.709100", "US_TIMEOUT_US": "30000", "US_CALIBRATION_RANGE_CM": "15:150", "IR_PIN": "A6", "IR_MODEL": "GP2Y0A21YK0F", "ADC_REFERENCE": "AVCC", "LASER_PROFILE": "long_range_33ms_single_shot", "DISTANCE_ORIGIN": "sensor_face"}}
+{"kind": "collection_mode", "utc": "2026-10-11T15:12:51.618994+00:00", "mode": "open_ended"}
+{"kind": "capture_settings", "utc": "2026-10-11T15:12:51.618994+00:00", "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "point", "utc": "2026-10-11T15:13:06.556321+00:00", "point_id": "2693a08b13aa47a8afc23b82e7d56b6e", "point_index": 1, "target_cm": 180.0, "actual_cm": 180.0}
+{"kind": "capture", "utc": "2026-10-11T15:13:08.031972+00:00", "capture_id": 1, "point_id": "2693a08b13aa47a8afc23b82e7d56b6e", "repeat": 1, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:13:08.533042+00:00", "capture_id": 1, "sequence": 0, "timestamp_ms": 24945, "raw": 229, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:09.034940+00:00", "capture_id": 1, "sequence": 1, "timestamp_ms": 25445, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:09.531353+00:00", "capture_id": 1, "sequence": 2, "timestamp_ms": 25945, "raw": 225, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:10.034030+00:00", "capture_id": 1, "sequence": 3, "timestamp_ms": 26445, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:10.536973+00:00", "capture_id": 1, "sequence": 4, "timestamp_ms": 26945, "raw": 208, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:11.037276+00:00", "capture_id": 1, "sequence": 5, "timestamp_ms": 27445, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:11.540555+00:00", "capture_id": 1, "sequence": 6, "timestamp_ms": 27945, "raw": 229, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:12.038637+00:00", "capture_id": 1, "sequence": 7, "timestamp_ms": 28445, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:12.539590+00:00", "capture_id": 1, "sequence": 8, "timestamp_ms": 28945, "raw": 226, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:13.040048+00:00", "capture_id": 1, "sequence": 9, "timestamp_ms": 29445, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:13:13.040048+00:00", "capture_id": 1}
+{"kind": "review", "utc": "2026-10-11T15:13:14.234814+00:00", "capture_id": 1, "decision": "accepted"}
+{"kind": "capture", "utc": "2026-10-11T15:13:16.137408+00:00", "capture_id": 2, "point_id": "2693a08b13aa47a8afc23b82e7d56b6e", "repeat": 2, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:13:16.643465+00:00", "capture_id": 2, "sequence": 0, "timestamp_ms": 33052, "raw": 227, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:17.144163+00:00", "capture_id": 2, "sequence": 1, "timestamp_ms": 33552, "raw": 225, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:17.646165+00:00", "capture_id": 2, "sequence": 2, "timestamp_ms": 34052, "raw": 225, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:18.149152+00:00", "capture_id": 2, "sequence": 3, "timestamp_ms": 34552, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:18.645376+00:00", "capture_id": 2, "sequence": 4, "timestamp_ms": 35052, "raw": 295, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:19.146385+00:00", "capture_id": 2, "sequence": 5, "timestamp_ms": 35552, "raw": 233, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:19.646693+00:00", "capture_id": 2, "sequence": 6, "timestamp_ms": 36052, "raw": 228, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:20.147446+00:00", "capture_id": 2, "sequence": 7, "timestamp_ms": 36552, "raw": 225, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:20.648159+00:00", "capture_id": 2, "sequence": 8, "timestamp_ms": 37052, "raw": 225, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:21.149305+00:00", "capture_id": 2, "sequence": 9, "timestamp_ms": 37552, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:13:21.149305+00:00", "capture_id": 2}
+{"kind": "review", "utc": "2026-10-11T15:13:22.191219+00:00", "capture_id": 2, "decision": "accepted"}
+{"kind": "capture", "utc": "2026-10-11T15:13:24.052885+00:00", "capture_id": 3, "point_id": "2693a08b13aa47a8afc23b82e7d56b6e", "repeat": 3, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:13:24.559351+00:00", "capture_id": 3, "sequence": 0, "timestamp_ms": 40968, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:25.059475+00:00", "capture_id": 3, "sequence": 1, "timestamp_ms": 41468, "raw": 307, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:25.563156+00:00", "capture_id": 3, "sequence": 2, "timestamp_ms": 41968, "raw": 231, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:26.063306+00:00", "capture_id": 3, "sequence": 3, "timestamp_ms": 42468, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:26.561456+00:00", "capture_id": 3, "sequence": 4, "timestamp_ms": 42968, "raw": 226, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:27.063026+00:00", "capture_id": 3, "sequence": 5, "timestamp_ms": 43468, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:27.563234+00:00", "capture_id": 3, "sequence": 6, "timestamp_ms": 43968, "raw": 224, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:28.048372+00:00", "capture_id": 3, "sequence": 7, "timestamp_ms": 44468, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:28.548896+00:00", "capture_id": 3, "sequence": 8, "timestamp_ms": 44968, "raw": 231, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:29.050372+00:00", "capture_id": 3, "sequence": 9, "timestamp_ms": 45468, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:13:29.066159+00:00", "capture_id": 3}
+{"kind": "review", "utc": "2026-10-11T15:13:29.706644+00:00", "capture_id": 3, "decision": "accepted"}
+{"kind": "point_done", "utc": "2026-10-11T15:13:29.706644+00:00", "point_id": "2693a08b13aa47a8afc23b82e7d56b6e"}
+{"kind": "point", "utc": "2026-10-11T15:13:43.589328+00:00", "point_id": "3c5fb70a791a41ed945e870bfd62ac8c", "point_index": 2, "target_cm": 170.0, "actual_cm": 170.0}
+{"kind": "capture", "utc": "2026-10-11T15:13:46.637819+00:00", "capture_id": 4, "point_id": "3c5fb70a791a41ed945e870bfd62ac8c", "repeat": 1, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:13:47.146191+00:00", "capture_id": 4, "sequence": 0, "timestamp_ms": 63554, "raw": 200, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:47.643572+00:00", "capture_id": 4, "sequence": 1, "timestamp_ms": 64054, "raw": 215, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:48.145149+00:00", "capture_id": 4, "sequence": 2, "timestamp_ms": 64555, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:48.645090+00:00", "capture_id": 4, "sequence": 3, "timestamp_ms": 65055, "raw": 219, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:49.148302+00:00", "capture_id": 4, "sequence": 4, "timestamp_ms": 65555, "raw": 217, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:49.647387+00:00", "capture_id": 4, "sequence": 5, "timestamp_ms": 66055, "raw": 216, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:50.147060+00:00", "capture_id": 4, "sequence": 6, "timestamp_ms": 66555, "raw": 216, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:50.648109+00:00", "capture_id": 4, "sequence": 7, "timestamp_ms": 67055, "raw": 277, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:51.136651+00:00", "capture_id": 4, "sequence": 8, "timestamp_ms": 67555, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:51.646546+00:00", "capture_id": 4, "sequence": 9, "timestamp_ms": 68055, "raw": 221, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:13:51.646546+00:00", "capture_id": 4}
+{"kind": "review", "utc": "2026-10-11T15:13:54.324355+00:00", "capture_id": 4, "decision": "accepted"}
+{"kind": "capture", "utc": "2026-10-11T15:13:57.246356+00:00", "capture_id": 5, "point_id": "3c5fb70a791a41ed945e870bfd62ac8c", "repeat": 2, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:13:57.755107+00:00", "capture_id": 5, "sequence": 0, "timestamp_ms": 74165, "raw": 215, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:58.256836+00:00", "capture_id": 5, "sequence": 1, "timestamp_ms": 74665, "raw": 274, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:58.757914+00:00", "capture_id": 5, "sequence": 2, "timestamp_ms": 75165, "raw": 215, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:59.242726+00:00", "capture_id": 5, "sequence": 3, "timestamp_ms": 75665, "raw": 221, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:13:59.743559+00:00", "capture_id": 5, "sequence": 4, "timestamp_ms": 76165, "raw": 215, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:00.255600+00:00", "capture_id": 5, "sequence": 5, "timestamp_ms": 76665, "raw": 217, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:00.744949+00:00", "capture_id": 5, "sequence": 6, "timestamp_ms": 77165, "raw": 215, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:01.256228+00:00", "capture_id": 5, "sequence": 7, "timestamp_ms": 77665, "raw": 214, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:01.751912+00:00", "capture_id": 5, "sequence": 8, "timestamp_ms": 78166, "raw": 295, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:02.250751+00:00", "capture_id": 5, "sequence": 9, "timestamp_ms": 78666, "raw": 222, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:14:02.250751+00:00", "capture_id": 5}
+{"kind": "review", "utc": "2026-10-11T15:14:03.229377+00:00", "capture_id": 5, "decision": "accepted"}
+{"kind": "capture", "utc": "2026-10-11T15:14:04.583181+00:00", "capture_id": 6, "point_id": "3c5fb70a791a41ed945e870bfd62ac8c", "repeat": 3, "samples_per_capture": 10, "period_ms": 500, "settle_ms": 500}
+{"kind": "sample", "utc": "2026-10-11T15:14:05.093888+00:00", "capture_id": 6, "sequence": 0, "timestamp_ms": 81502, "raw": 227, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:05.591699+00:00", "capture_id": 6, "sequence": 1, "timestamp_ms": 82002, "raw": 221, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:06.092154+00:00", "capture_id": 6, "sequence": 2, "timestamp_ms": 82502, "raw": 218, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:06.593085+00:00", "capture_id": 6, "sequence": 3, "timestamp_ms": 83002, "raw": 217, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:07.093481+00:00", "capture_id": 6, "sequence": 4, "timestamp_ms": 83502, "raw": 216, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:07.596629+00:00", "capture_id": 6, "sequence": 5, "timestamp_ms": 84002, "raw": 216, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:08.083873+00:00", "capture_id": 6, "sequence": 6, "timestamp_ms": 84502, "raw": 299, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:08.582683+00:00", "capture_id": 6, "sequence": 7, "timestamp_ms": 85002, "raw": 223, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:09.080303+00:00", "capture_id": 6, "sequence": 8, "timestamp_ms": 85502, "raw": 219, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T15:14:09.582315+00:00", "capture_id": 6, "sequence": 9, "timestamp_ms": 86002, "raw": 219, "valid": true, "status": "OK", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T15:14:09.582315+00:00", "capture_id": 6}
+{"kind": "review", "utc": "2026-10-11T15:14:12.255539+00:00", "capture_id": 6, "decision": "accepted"}
+{"kind": "point_done", "utc": "2026-10-11T15:14:12.255539+00:00", "point_id": "3c5fb70a791a41ed945e870bfd62ac8c"}
+{"kind": "interrupted", "utc": "2026-10-11T15:14:49.493984+00:00"}

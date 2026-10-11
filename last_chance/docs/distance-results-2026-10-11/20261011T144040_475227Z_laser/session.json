@@ -1,0 +1,16 @@
+{
+  "schema": 2,
+  "created_utc": "2026-10-11T14:40:40.475227+00:00",
+  "sensor": "laser",
+  "sensor_description": "Right VL53L0X",
+  "simulated": false,
+  "collection_mode": "open_ended",
+  "repeats": 3,
+  "samples_per_capture": 10,
+  "period_ms": 500,
+  "settle_ms": 500,
+  "distance_origin": "sensor_face",
+  "adc_reference_v": 5.0,
+  "adc_reference_source": "nominal",
+  "firmware_config": null
+}

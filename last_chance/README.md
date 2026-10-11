@@ -1,5 +1,11 @@
 # last_chance
 
+Archived measurements, raw records and reviews: [distance results](docs/distance-results-2026-10-11/README.md).
+
+Distance-sensor assignment: [guided US / right-laser / analog-IR test](docs/distance-test.md).
+Build/upload `distance_test`, then run the recorder directly from PowerShell:
+`& .\.venv\Scripts\python.exe -u tools\distance_test\distance_mission.py record --sensor us --port COM7`.
+
 Standalone stationary IMU experiment: see
 [the tilt mission instructions](docs/imu-tilt-mission.md). Build/upload with
 `pio run -e imu_tilt -t upload`, then use the guided recorder in

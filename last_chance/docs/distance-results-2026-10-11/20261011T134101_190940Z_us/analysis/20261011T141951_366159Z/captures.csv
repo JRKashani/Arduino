@@ -1,0 +1,3 @@
+﻿point_index,point_id,target_cm,actual_cm,repeat,capture_id,decision,included,complete,samples,valid_samples,requested_samples,period_ms,settle_ms,raw_min,raw_mean,raw_max,raw_std,raw_cm_min,raw_cm_mean,raw_cm_max,raw_cm_std,calibrated_cm_min,calibrated_cm_mean,calibrated_cm_max,calibrated_cm_std,voltage_min,voltage_mean,voltage_max,voltage_std
+1,2d2e0a82a0844c6d9f750905f05c7ea4,200,200.0,1,1,skipped,False,True,10,0,10,100,1000,,,,,,,,,,,,,,,,
+1,b7a7c84e476840808e9e09828e3fdaa0,180.0,180.0,1,2,accepted,True,True,10,10,10,500,500,3473,3682.8,4076,211.71353811748133,59.87931034482759,63.49655172413793,70.27586206896552,3.650233415818645,61.50755775862069,65.18032379310345,72.06369655172415,3.706264498751463,,,,
