@@ -9,6 +9,223 @@ namespace {
 Stage current = STAGE_NONE;
 bool emergencyLatched = false;
 
+enum class EntryMode : uint8_t {
+  Approach, Settling, ChooseDirection, Turning, SeekEquality,
+  Align45, CenterDrive, CorrectionOut, CorrectionDrive, CorrectionBack
+};
+EntryMode entryMode = EntryMode::Approach;
+EntryMode entryAfterSettle = EntryMode::ChooseDirection;
+unsigned long entrySettleStartMs = 0;
+TurnDirection entryFirstTurn = TurnDirection::Left;
+TurnDirection entryCorrectionTurn = TurnDirection::Left;
+bool entryMatchInitialized = false;
+float entryPreviousMatchErrorCm = 0.0f;
+
+const __FlashStringHelper *entryModeName(EntryMode mode) {
+  switch (mode) {
+    case EntryMode::Approach: return F("APPROACH");
+    case EntryMode::Settling: return F("SETTLING");
+    case EntryMode::ChooseDirection: return F("CHOOSE_SIDE");
+    case EntryMode::Turning: return F("TURN_90");
+    case EntryMode::SeekEquality: return F("MATCH_FRONT_SIDE");
+    case EntryMode::Align45: return F("ALIGN_45");
+    case EntryMode::CenterDrive: return F("CENTER");
+    case EntryMode::CorrectionOut: return F("CORRECTION_TURN_OUT");
+    case EntryMode::CorrectionDrive: return F("CORRECTION_DRIVE");
+    case EntryMode::CorrectionBack: return F("CORRECTION_TURN_BACK");
+  }
+  return F("UNKNOWN");
+}
+
+void logEntryDecision(const __FlashStringHelper *decision) {
+  Serial.print(F("ENTRY stage=")); Serial.print(static_cast<uint8_t>(current));
+  Serial.print(F(" t=")); Serial.print(millis());
+  Serial.print(F("ms state=")); Serial.print(entryModeName(entryMode));
+  Serial.print(F(" decision=")); Serial.println(decision);
+}
+static_assert(ENTRY_TURN_CALIBRATION_INDEX < MOTOR_TURN_90DEG_COUNT,
+              "Stage 1 turn calibration index out of range");
+static_assert(STAGE1_WALL_TARGET_CM > FRONT_EMERGENCY_STOP_CM,
+              "Stage 1 target must be above the front safety stop");
+
+TurnDirection opposite(TurnDirection direction) {
+  return direction == TurnDirection::Left ? TurnDirection::Right : TurnDirection::Left;
+}
+
+void settleEntryReadings(EntryMode next) {
+  stopMotion();
+  resetDistanceFilters();
+  entrySettleStartMs = millis();
+  entryAfterSettle = next;
+  entryMode = EntryMode::Settling;
+  Serial.print(F("ENTRY filters reset; settle_ms=")); Serial.print(ENTRY_MEASURE_SETTLE_MS);
+  Serial.print(F(" next=")); Serial.println(entryModeName(next));
+}
+
+bool startEntryTurn(TurnDirection direction, float degrees, EntryMode next) {
+  stopMotion();
+  logEntryDecision(direction == TurnDirection::Left ? F("TURN_LEFT") : F("TURN_RIGHT"));
+  Serial.print(F("ENTRY turn_angle_deg=")); Serial.println(degrees, 1);
+  if (!turnCalibrated(direction, degrees, ENTRY_TURN_CALIBRATION_INDEX)) {
+    Serial.println(F("ENTRY turn rejected -> STOP"));
+    stopStage();
+    return false;
+  }
+  entryMode = next;
+  Serial.print(F("ENTRY state=")); Serial.println(entryModeName(next));
+  return true;
+}
+
+void runEntryStages(const SensorData &d) {
+  if (entryMode == EntryMode::Settling) {
+    if (millis() - entrySettleStartMs >= ENTRY_MEASURE_SETTLE_MS) {
+      logEntryDecision(F("fresh-reading wait finished; enter next state"));
+      entryMode = entryAfterSettle;
+      Serial.print(F("ENTRY state=")); Serial.println(entryModeName(entryMode));
+    } else {
+      logEntryDecision(F("STOP; wait for filters to refill"));
+    }
+    return;
+  }
+  if (entryMode == EntryMode::Approach) {
+    // No trustworthy front range means no forward motion.
+    if (!d.frontValid) {
+      logEntryDecision(F("STOP; invalid front reading"));
+      stopMotion(); return;
+    }
+    // Use the current calibrated sample too: the median can lag while closing.
+    const float frontCm = min(d.frontCm,
+        d.frontRawCm + ULTRASONIC_FRONT_FORWARD_OFFSET_CM);
+    Serial.print(F("ENTRY approach front_used_cm=")); Serial.print(frontCm, 1);
+    Serial.print(F(" target_cm=")); Serial.println(STAGE1_WALL_TARGET_CM, 1);
+    if (frontCm > STAGE1_WALL_TARGET_CM) {
+      logEntryDecision(F("DRIVE_FORWARD; front greater than target"));
+      driveContinuous(STAGE1_APPROACH_PWM, 0, MOTION_STRAIGHT_BIAS);
+      return;
+    }
+    logEntryDecision(F("STOP; target reached; prepare side comparison"));
+    settleEntryReadings(EntryMode::ChooseDirection);
+    Serial.print(F("ENTRY wall reached at ")); Serial.print(frontCm, 1);
+    Serial.println(F("cm -> compare sides"));
+    return; // compare a fresh side snapshot after stopping
+  }
+
+  if (entryMode == EntryMode::ChooseDirection) {
+    stopMotion();
+    // Invalid or equal readings cannot identify the closer side. Stay stopped.
+    if (!d.leftWallValid || !d.rightWallValid) {
+      logEntryDecision(F("STOP; invalid side reading"));
+      return;
+    }
+    if (d.leftWallCm == d.rightWallCm) {
+      logEntryDecision(F("STOP; sides equal; turn direction unknown"));
+      return;
+    }
+    entryFirstTurn = d.leftWallCm < d.rightWallCm
+        ? TurnDirection::Left : TurnDirection::Right;
+    Serial.print(F("ENTRY L=")); Serial.print(d.leftWallCm, 1);
+    Serial.print(F("cm R=")); Serial.print(d.rightWallCm, 1);
+    Serial.println(entryFirstTurn == TurnDirection::Left
+        ? F("cm -> calibrated 90 deg LEFT") : F("cm -> calibrated 90 deg RIGHT"));
+    startEntryTurn(entryFirstTurn, 90.0f, EntryMode::Turning);
+    return;
+  }
+
+  if (entryMode == EntryMode::SeekEquality) {
+    // Left 90 -> old forward is now right. Right 90 -> it is now left.
+    const bool sideValid = entryFirstTurn == TurnDirection::Left
+        ? d.rightWallValid : d.leftWallValid;
+    const float sideCm = entryFirstTurn == TurnDirection::Left
+        ? d.rightWallCm : d.leftWallCm;
+    if (!d.frontValid || !sideValid) {
+      logEntryDecision(F("STOP; invalid front or original-wall side reading"));
+      stopMotion(); return;
+    }
+    const float frontCm = min(d.frontCm,
+        d.frontRawCm + ULTRASONIC_FRONT_FORWARD_OFFSET_CM);
+    Serial.print(F("ENTRY match front=")); Serial.print(frontCm, 1);
+    Serial.print(F("cm old-forward side="));
+    Serial.print(entryFirstTurn == TurnDirection::Left ? F("RIGHT ") : F("LEFT "));
+    Serial.print(sideCm, 1);
+    Serial.print(F("cm tolerance_cm=")); Serial.println(STAGE1_EQUAL_TOLERANCE_CM, 1);
+    const float errorCm = frontCm - sideCm;
+    // Stop at equality or its crossing: sampling can skip over the exact value.
+    const bool crossed = entryMatchInitialized && entryPreviousMatchErrorCm > 0 && errorCm < 0;
+    if (fabs(errorCm) <= STAGE1_EQUAL_TOLERANCE_CM || crossed) {
+      logEntryDecision(crossed ? F("STOP; equality crossed; hand off to STAGE 2")
+                             : F("STOP; distances equal within tolerance; hand off to STAGE 2"));
+      current = STAGE_FUNNEL;
+      Serial.println(F("STAGE 1 complete -> STAGE 2: funnel; turn back 45 deg, then center."));
+      startEntryTurn(opposite(entryFirstTurn), 45.0f, EntryMode::Align45);
+    } else if (errorCm < 0) {
+      // Already past equality at the first measurement: forward cannot fix it.
+      Serial.println(F("ENTRY front already shorter than side -> STOP; reposition."));
+      stopStage();
+    } else {
+      logEntryDecision(F("DRIVE_FORWARD; front greater than original-wall side"));
+      entryMatchInitialized = true;
+      entryPreviousMatchErrorCm = errorCm;
+      driveContinuous(STAGE1_APPROACH_PWM, 0, MOTION_STRAIGHT_BIAS);
+    }
+    return;
+  }
+
+  if (entryMode == EntryMode::CenterDrive) {
+    if (!d.frontValid || !d.leftWallValid || !d.rightWallValid) {
+      logEntryDecision(F("STOP; invalid front or side reading"));
+      stopMotion();
+      return;
+    }
+    const float errorCm = d.leftWallCm - d.rightWallCm;
+    Serial.print(F("ENTRY center L=")); Serial.print(d.leftWallCm, 1);
+    Serial.print(F("cm R=")); Serial.print(d.rightWallCm, 1);
+    Serial.print(F("cm difference=")); Serial.print(errorCm, 1);
+    Serial.print(F("cm tolerance_cm=")); Serial.println(STAGE2_EQUAL_TOLERANCE_CM, 1);
+    if (fabs(errorCm) <= STAGE2_EQUAL_TOLERANCE_CM) {
+      logEntryDecision(F("DRIVE_FORWARD; sides equal within tolerance"));
+      driveContinuous(STAGE2_DRIVE_PWM, 0, MOTION_STRAIGHT_BIAS);
+      return;
+    }
+    // Move away from the nearer wall, toward the side with more clearance.
+    entryCorrectionTurn = errorCm > 0 ? TurnDirection::Left : TurnDirection::Right;
+    Serial.println(entryCorrectionTurn == TurnDirection::Left
+        ? F("ENTRY correction LEFT: 45 deg / 5 cm / 45 deg back")
+        : F("ENTRY correction RIGHT: 45 deg / 5 cm / 45 deg back"));
+    startEntryTurn(entryCorrectionTurn, 45.0f, EntryMode::CorrectionOut);
+    return;
+  }
+
+  // These phases own one timed movement; never overwrite it with live drive.
+  if (motionBusy()) {
+    logEntryDecision(F("CONTINUE_TIMED_MOTION; monitor front safety"));
+    return;
+  }
+  logEntryDecision(F("TIMED_MOTION_FINISHED; advance maneuver"));
+  switch (entryMode) {
+    case EntryMode::Turning:
+      entryMatchInitialized = false;
+      settleEntryReadings(EntryMode::SeekEquality);
+      break;
+    case EntryMode::Align45:
+    case EntryMode::CorrectionBack:
+      settleEntryReadings(EntryMode::CenterDrive);
+      break;
+    case EntryMode::CorrectionOut:
+      Serial.print(F("ENTRY drive_distance_cm=")); Serial.println(STAGE2_CORRECTION_DISTANCE_CM, 1);
+      if (!driveStageCm(STAGE2_CORRECTION_DISTANCE_CM)) {
+        Serial.println(F("ENTRY correction drive rejected -> STOP"));
+        stopStage();
+      } else {
+        entryMode = EntryMode::CorrectionDrive;
+      }
+      break;
+    case EntryMode::CorrectionDrive:
+      startEntryTurn(opposite(entryCorrectionTurn), 45.0f, EntryMode::CorrectionBack);
+      break;
+    default: break;
+  }
+}
+
 // Stage 3 derivative-term state (approach rate of the right-wall distance).
 bool wallDerivInit = false;
 float wallPrevErrorMm = 0.0f;
@@ -193,8 +410,20 @@ void runWallFollow(const SensorData &d) {
 
 void startStage(uint8_t stage) {
   stopMotion();
+  setStageSensorLogging(stage == STAGE_OPEN || stage == STAGE_FUNNEL);
   emergencyLatched = false;
-  if (stage == STAGE_WALL) {
+  if (stage == STAGE_OPEN) {
+    current = STAGE_OPEN;
+    entryMode = EntryMode::Approach;
+    Serial.print(F("STAGE 1: approach wall @")); Serial.print(STAGE1_WALL_TARGET_CM, 1);
+    Serial.println(F(" cm, turn 90, match front/side -> Stage 2. S/X stops."));
+    Serial.println(F("ENTRY full logging ON: every sensor update and decision. USnew marks fresh ultrasonic samples."));
+  } else if (stage == STAGE_FUNNEL) {
+    current = STAGE_FUNNEL;
+    Serial.println(F("STAGE 2: funnel centering; start already aligned along funnel. S/X stops."));
+    Serial.println(F("ENTRY full logging ON: every sensor update and decision. USnew marks fresh ultrasonic samples."));
+    settleEntryReadings(EntryMode::CenterDrive);
+  } else if (stage == STAGE_WALL) {
     current = STAGE_WALL;
     resetWallStage();
     Serial.println(F("STAGE 3: right-wall follow @30 cm. S/X stops."));
@@ -211,6 +440,7 @@ void startStage(uint8_t stage) {
 void stopStage() {
   if (current != STAGE_NONE) Serial.println(F("Stage stopped."));
   current = STAGE_NONE;
+  setStageSensorLogging(false);
   emergencyLatched = false;
   resetWallStage();
   stopMotion();
@@ -224,8 +454,21 @@ void runStageManager() {
 
   // Safety override: stop if something is close ahead. Latched so we report it
   // once and stay stopped until the path clears.
-  if (d.frontValid && d.frontCm <= FRONT_EMERGENCY_STOP_CM) {
+  const bool entryStage = current == STAGE_OPEN || current == STAGE_FUNNEL;
+  const float safetyFrontCm = entryStage
+      ? min(d.frontCm, d.frontRawCm + ULTRASONIC_FRONT_FORWARD_OFFSET_CM)
+      : d.frontCm;
+  if (d.frontValid && safetyFrontCm <= FRONT_EMERGENCY_STOP_CM) {
     stopMotion();
+    // A cancelled timed turn cannot be resumed or counted as a completed turn.
+    if (entryStage) {
+      logEntryDecision(F("STOP_AND_CANCEL; front at/below emergency threshold"));
+      Serial.print(F("ENTRY safety front_used_cm=")); Serial.print(safetyFrontCm, 1);
+      Serial.print(F(" threshold_cm=")); Serial.println(FRONT_EMERGENCY_STOP_CM, 1);
+      Serial.println(F("ENTRY front safety stop -> stage cancelled. Reposition before restarting 1/2."));
+      stopStage();
+      return;
+    }
     if (!emergencyLatched) {
       emergencyLatched = true;
       Serial.print(F("SAFETY STOP: front ")); Serial.print(d.frontCm, 1);
@@ -240,6 +483,8 @@ void runStageManager() {
   if (emergencyLatched) { stopMotion(); return; }
 
   switch (current) {
+    case STAGE_OPEN: runEntryStages(d); break;
+    case STAGE_FUNNEL: runEntryStages(d); break;
     case STAGE_WALL: runWallFollow(d); break;
     default: stopStage(); break;
   }

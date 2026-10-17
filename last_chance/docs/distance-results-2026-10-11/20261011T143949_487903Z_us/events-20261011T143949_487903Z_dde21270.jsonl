@@ -1,2 +1,0 @@
-{"kind": "connection", "utc": "2026-10-11T14:39:51.525747+00:00", "firmware_version": "1.1.0", "firmware_config": {"US_SCALE": "1.015350", "US_OFFSET_CM": "0.709100", "US_TIMEOUT_US": "30000", "US_CALIBRATION_RANGE_CM": "15:150", "IR_PIN": "A6", "IR_MODEL": "GP2Y0A21YK0F", "ADC_REFERENCE": "AVCC", "LASER_PROFILE": "default_33ms_single_shot", "DISTANCE_ORIGIN": "sensor_face"}}
-{"kind": "interrupted", "utc": "2026-10-11T14:40:30.404947+00:00"}

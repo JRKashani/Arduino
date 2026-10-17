@@ -14,7 +14,10 @@ and what to do next. Read sections 1–4 before touching the robot.
   Open **the `last_chance` folder** in VS Code with the PlatformIO extension.
 - Working today on hardware: motors, all sensors (+ live telemetry), and
   **Stage 3: follow the right wall at 30 cm**, including 45° outside and inside
-  corners. Stages 1, 2, 4, 5 are **not implemented**.
+  corners. Stage 1 now implements wall approach, 90-degree turn and front/side
+  equality, then hands off to Stage 2 for 45-degree alignment and funnel centering
+  (2026-10-03; builds successfully, untested on hardware). Stages 4, 5 are
+  **not implemented**.
 - The **last commit is untested on hardware** (anti-chatter, dead-zone
   compensation, 8 s search timeout). First job: test it (section 7.1).
 - **90° corners have not been tested.** Outside 90° corners are the biggest
@@ -170,7 +173,9 @@ baseline then.
 |---|---|
 | `T` | Toggle live sensor telemetry (`SENS …` lines) |
 | `3` | Start Stage 3 (right-wall follow) |
-| `1`,`2`,`4`,`5` | Prints "not implemented yet" |
+| `1` | Wall approach, 90-degree turn, front/old-forward-side equality, automatic handoff to Stage 2 |
+| `2` | Direct funnel centering test; robot must already face along funnel; skips entry turn |
+| `4`,`5` | Prints "not implemented yet" |
 | `X` or `S` | Stop the running stage / stop motors |
 | `F` | Timed forward 60 cm (test move) |
 | `L` / `R` | Timed quarter circle left / right (test move; overshoots — known) |
@@ -360,11 +365,13 @@ wall (outside 45° corner, then inside 45° corner):
    `TILT_TOLERANCE_DEG`, `ROLL_CORRECTION_GAIN`, `STAGE4_CLIMB_SPEED` (60 is
    probably too fast). Needed first: wadi dimensions, how the robot enters it,
    and an IMU mount check (2.3).
-4. **Stage 2 — funnel.** Same PD controller; error = `Lwall − Rwall` (the laser
-   offsets cancel), target 0.
+4. **Stage 2 — funnel.** Implemented: 45-degree alignment after Stage 1, then
+   compare both sides and correct with 45-degree turn / 5 cm drive / turn back.
+   Test the scaled turn timings and define the funnel-end condition.
 5. **Stage 5 — light.** Two fixed LDRs, steer on `ldrDiff`; stop with the front
    ultrasonic (see risk 5). Room lights off + phone flash = good conditions.
-6. **Stage 1 — open area** to the funnel entrance.
+6. **Stage 1 — open area** to the funnel entrance. Wall approach and front/side
+   equality are implemented; equality hands off automatically to Stage 2.
 7. **Stage manager transitions** 1→2→3→4→5 and one "run whole track" command.
 8. **Documentation (70% of the grade):** electronic schematic (use the pin
    map in 2.1), overview flowchart + one flowchart per stage (section 6.2 is

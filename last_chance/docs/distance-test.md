@@ -15,6 +15,10 @@ actual measurement; plots use 198.7.
 
 ## Wiring
 
+[Wiring diagram (PNG)](diagrams/distance-sensors-wiring.png) ·
+[SVG](diagrams/distance-sensors-wiring.svg) · [PDF](diagrams/distance-sensors-wiring.pdf).
+The laser module uses the user-confirmed 5 V supply; power-pin names follow the module labels.
+
 | Sensor | Existing / new connection |
 |---|---|
 | Front HC-SR04 | TRIG 43, ECHO 42; existing 5 V and GND |

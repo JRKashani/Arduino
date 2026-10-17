@@ -74,6 +74,18 @@ const uint8_t LED_GREEN_PIN = 9;
 const uint8_t LED_WHITE_PIN = 12;
 const int DRIVE_SPEED = 50;
 
+// Stage 1: approach the facing wall, then turn toward the closer side.
+constexpr float STAGE1_WALL_TARGET_CM = 30.0f; // X, from robot center
+const int STAGE1_APPROACH_PWM = MOTION_PWM;
+// Stages 1/2 share the tight turn calibration and fresh-reading wait.
+constexpr uint8_t ENTRY_TURN_CALIBRATION_INDEX = 5;
+const float STAGE1_EQUAL_TOLERANCE_CM = 2.0f;
+// Stage 2: 45-degree alignment and discrete funnel centering.
+const int STAGE2_DRIVE_PWM = MOTION_PWM;
+const float STAGE2_EQUAL_TOLERANCE_CM = 2.0f;
+const float STAGE2_CORRECTION_DISTANCE_CM = 5.0f;
+const unsigned long ENTRY_MEASURE_SETTLE_MS = 700UL; // refill five front samples
+
 // Stage 3
 const int RIGHT_WALL_FOLLOW_TARGET_MM = 300; // 30 cm from robot center
 const float WALL_FOLLOW_GAIN = 0.10;         // Kp: steer per mm of distance error
@@ -115,7 +127,7 @@ const int CORNER_MAX_STEER = 25;           // away-steer magnitude at full
 const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;
 
 // Safety stop (front obstacle) while a stage runs
-const float FRONT_EMERGENCY_STOP_CM = 20.0;
+constexpr float FRONT_EMERGENCY_STOP_CM = 20.0;
 const float FRONT_EMERGENCY_CLEAR_CM = 30.0;
 
 // Stage 4

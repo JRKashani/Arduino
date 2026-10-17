@@ -52,9 +52,13 @@ bool setupSensors();
 void updateSensors();
 
 const SensorData &latestSensorData();
+// Discard ranges from the previous heading; updateSensors refills the filters.
+void resetDistanceFilters();
 
 // Live serial dashboard, off by default. Toggle with toggleSensorTelemetry();
 // when enabled, updateSensors() prints a line every SENSOR_TELEMETRY_INTERVAL_MS.
 void toggleSensorTelemetry();
+// Stage 1/2 test logging: every update, independent of the T dashboard toggle.
+void setStageSensorLogging(bool enabled);
 
 #endif

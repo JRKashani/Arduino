@@ -9,7 +9,8 @@ void printMotionTestMenu() {
   Serial.print(F("F: forward ")); Serial.print(MOTION_TEST_DISTANCE_CM);
   Serial.println(F(" cm; L: left quarter-circle; R: right quarter-circle"));
   Serial.println(F("S: stop/cancel; T: toggle sensor telemetry; H/?: help."));
-  Serial.println(F("3: run right-wall follow stage; X: stop stage."));
+  Serial.println(F("1: open area -> 2 automatically; 2: funnel (already aligned); 3: wall follow; X: stop."));
+  Serial.println(F("1/2 automatically log EVERY sensor update and decision; no T needed."));
   Serial.println(F("Send one command at a time. Timed estimates; no obstacle stop."));
 }
 

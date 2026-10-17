@@ -1,0 +1,162 @@
+{
+  "model": "corrected_cm = scale * reported_cm + offset_cm",
+  "scale": 0.9692414511151219,
+  "offset_cm": -0.6992662276654613,
+  "training_session": "20261011T144802_531804Z_laser",
+  "training_measured_range_cm": [
+    20.0,
+    170.0
+  ],
+  "fit_method": "ordinary least squares; equal weight per position mean",
+  "training": [
+    {
+      "measured_cm": 20.0,
+      "reported_cm": 22.663333333333334,
+      "corrected_cm": 21.266975859440254,
+      "before_error_cm": 2.663333333333334,
+      "after_error_cm": 1.2669758594402545
+    },
+    {
+      "measured_cm": 30.0,
+      "reported_cm": 32.013333333333335,
+      "corrected_cm": 30.329383427366643,
+      "before_error_cm": 2.0133333333333354,
+      "after_error_cm": 0.3293834273666434
+    },
+    {
+      "measured_cm": 40.0,
+      "reported_cm": 41.89666666666667,
+      "corrected_cm": 39.9087197692211,
+      "before_error_cm": 1.8966666666666683,
+      "after_error_cm": -0.09128023077889935
+    },
+    {
+      "measured_cm": 50.0,
+      "reported_cm": 51.406666666666666,
+      "corrected_cm": 49.12620596932591,
+      "before_error_cm": 1.4066666666666663,
+      "after_error_cm": -0.873794030674091
+    },
+    {
+      "measured_cm": 60.0,
+      "reported_cm": 62.29666666666667,
+      "corrected_cm": 59.68124537196959,
+      "before_error_cm": 2.296666666666667,
+      "after_error_cm": -0.3187546280304119
+    },
+    {
+      "measured_cm": 70.0,
+      "reported_cm": 71.9,
+      "corrected_cm": 68.9891941075118,
+      "before_error_cm": 1.9000000000000057,
+      "after_error_cm": -1.010805892488193
+    },
+    {
+      "measured_cm": 80.0,
+      "reported_cm": 83.55333333333333,
+      "corrected_cm": 80.28408781784002,
+      "before_error_cm": 3.5533333333333275,
+      "after_error_cm": 0.28408781784001746
+    },
+    {
+      "measured_cm": 90.0,
+      "reported_cm": 94.14,
+      "corrected_cm": 90.54512398031211,
+      "before_error_cm": 4.140000000000001,
+      "after_error_cm": 0.5451239803121126
+    },
+    {
+      "measured_cm": 100.0,
+      "reported_cm": 104.05,
+      "corrected_cm": 100.15030676086297,
+      "before_error_cm": 4.049999999999997,
+      "after_error_cm": 0.1503067608629749
+    },
+    {
+      "measured_cm": 110.0,
+      "reported_cm": 113.26333333333334,
+      "corrected_cm": 109.0802513304703,
+      "before_error_cm": 3.2633333333333354,
+      "after_error_cm": -0.9197486695296959
+    },
+    {
+      "measured_cm": 120.0,
+      "reported_cm": 124.45,
+      "corrected_cm": 119.92283236361146,
+      "before_error_cm": 4.450000000000003,
+      "after_error_cm": -0.07716763638853763
+    },
+    {
+      "measured_cm": 130.0,
+      "reported_cm": 134.51666666666665,
+      "corrected_cm": 129.67986297150367,
+      "before_error_cm": 4.5166666666666515,
+      "after_error_cm": -0.3201370284963332
+    },
+    {
+      "measured_cm": 140.0,
+      "reported_cm": 145.57333333333332,
+      "corrected_cm": 140.3964426159999,
+      "before_error_cm": 5.5733333333333235,
+      "after_error_cm": 0.39644261599988795
+    },
+    {
+      "measured_cm": 150.0,
+      "reported_cm": 155.50666666666666,
+      "corrected_cm": 150.0242410304101,
+      "before_error_cm": 5.506666666666661,
+      "after_error_cm": 0.024241030410109943
+    },
+    {
+      "measured_cm": 160.0,
+      "reported_cm": 165.98666666666665,
+      "corrected_cm": 160.18189143809656,
+      "before_error_cm": 5.98666666666665,
+      "after_error_cm": 0.1818914380965566
+    },
+    {
+      "measured_cm": 170.0,
+      "reported_cm": 176.56333333333333,
+      "corrected_cm": 170.43323518605752,
+      "before_error_cm": 6.563333333333333,
+      "after_error_cm": 0.4332351860575159
+    }
+  ],
+  "follow_up_session": "20261011T152053_543501Z_laser",
+  "follow_up": [
+    {
+      "measured_cm": 50.0,
+      "reported_cm": 51.17333333333333,
+      "corrected_cm": 48.900049630732376,
+      "before_error_cm": 1.173333333333332,
+      "after_error_cm": -1.0999503692676242
+    },
+    {
+      "measured_cm": 60.0,
+      "reported_cm": 62.01,
+      "corrected_cm": 59.40339615598325,
+      "before_error_cm": 2.009999999999998,
+      "after_error_cm": -0.596603844016748
+    },
+    {
+      "measured_cm": 70.0,
+      "reported_cm": 71.97666666666666,
+      "corrected_cm": 69.06350261876396,
+      "before_error_cm": 1.9766666666666595,
+      "after_error_cm": -0.9364973812360375
+    },
+    {
+      "measured_cm": 91.0,
+      "reported_cm": 95.62333333333333,
+      "corrected_cm": 91.98283213279954,
+      "before_error_cm": 4.623333333333335,
+      "after_error_cm": 0.982832132799544
+    }
+  ],
+  "applied_to_firmware": false,
+  "limitations": "Experimental fit; mounting change near 60 cm; tape uncertainty +/-1 cm. Sample-range bars exclude fit uncertainty. Follow-up was not used to fit coefficients.",
+  "training_before_mae_cm": 3.7362499999999974,
+  "training_after_mae_cm": 0.4514610145482647,
+  "follow_up_before_mae_cm": 2.445833333333331,
+  "follow_up_after_mae_cm": 0.9039709318299884
+}

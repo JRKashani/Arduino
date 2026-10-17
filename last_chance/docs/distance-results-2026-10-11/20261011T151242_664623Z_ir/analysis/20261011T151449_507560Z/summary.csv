@@ -1,3 +1,0 @@
-﻿point_index,target_cm,actual_cm,completed,accepted_captures,usable_captures,valid_samples,total_samples,within_nominal_range,within_us_calibration_range,three_usable_repeats,raw_min,raw_mean,raw_max,raw_std,raw_cm_min,raw_cm_mean,raw_cm_max,raw_cm_std,calibrated_cm_min,calibrated_cm_mean,calibrated_cm_max,calibrated_cm_std,voltage_min,voltage_mean,voltage_max,voltage_std,error_cm
-2,170.0,170.0,True,3,3,30,30,False,,True,222.7,226.83333333333334,230.3,3.843609414773231,,,,,,,,,1.0253343108504398,1.0443646138807428,1.0603255131964808,0.017696383522562906,
-1,180.0,180.0,True,3,3,30,30,False,,True,223.5,230.03333333333333,233.5,5.661566332149904,,,,,,,,,1.029017595307918,1.0590977517106548,1.0750586510263929,0.026066449095235544,

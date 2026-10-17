@@ -1,2 +1,0 @@
-{"kind": "connection", "utc": "2026-10-11T15:06:05.456726+00:00", "firmware_version": "1.2.0", "firmware_config": {"US_SCALE": "1.015350", "US_OFFSET_CM": "0.709100", "US_TIMEOUT_US": "30000", "US_CALIBRATION_RANGE_CM": "15:150", "IR_PIN": "A6", "IR_MODEL": "GP2Y0A21YK0F", "ADC_REFERENCE": "AVCC", "LASER_PROFILE": "long_range_33ms_single_shot", "DISTANCE_ORIGIN": "sensor_face"}}
-{"kind": "error", "utc": "2026-10-11T15:08:37.833593+00:00", "message": "ClearCommError failed (PermissionError(13, 'The device does not recognize the command.', None, 22))"}

@@ -51,6 +51,7 @@ uint8_t nextUltrasonic = 0; // 0 = front, 1 = right-45
 
 // Telemetry.
 bool telemetryOn = false;
+bool stageSensorLogging = false;
 unsigned long lastTelemetryMs = 0;
 
 // Enable a VL53L0X: hold XSHUT low to shut down, then release to high-Z so the
@@ -98,8 +99,9 @@ void printField(const char *label, float value, bool valid, const char *unit) {
   Serial.print(' ');
 }
 
-void printTelemetry() {
-  Serial.print(F("SENS "));
+void printTelemetry(bool frontFresh, bool rightDiagFresh) {
+  Serial.print(F("SENS t=")); Serial.print(data.timestampMs);
+  Serial.print(F("ms "));
   printField("Lwall=", data.leftWallCm, data.leftWallValid, "cm");
   printField("Rwall=", data.rightWallCm, data.rightWallValid, "cm");
   Serial.print(F("(raw L/R mm="));
@@ -107,6 +109,11 @@ void printTelemetry() {
   Serial.print(F(") "));
   printField("Front=", data.frontCm, data.frontValid, "cm");
   printField("R45=", data.rightDiagCm, data.rightDiagValid, "cm");
+  printField("FrontSample=", data.frontRawCm, data.frontValid, "cm");
+  printField("R45Sample=", data.rightDiagRawCm, data.rightDiagValid, "cm");
+  Serial.print(F("USnew="));
+  Serial.print(frontFresh ? F("front") : (rightDiagFresh ? F("R45") : F("none")));
+  Serial.print(' ');
   Serial.print(F("LDR L/R/diff="));
   Serial.print(data.ldrLeft); Serial.print('/');
   Serial.print(data.ldrRight); Serial.print('/');
@@ -146,6 +153,7 @@ bool setupSensors() {
 
 void updateSensors() {
   const unsigned long now = millis();
+  bool frontFresh = false, rightDiagFresh = false;
   data.timestampMs = now;
 
   // Lasers (read every call; continuous mode). NOTE: readRange* blocks until a
@@ -166,6 +174,7 @@ void updateSensors() {
     lastPingMs = now;
     bool valid = false;
     if (nextUltrasonic == 0) {
+      frontFresh = true;
       float rawCm = readUltrasonicCm(ULTRASONIC_FRONT_TRIG_PIN,
                                      ULTRASONIC_FRONT_ECHO_PIN, valid);
       if (valid) frontUsFilter.push(rawCm);
@@ -175,6 +184,7 @@ void updateSensors() {
                          ? frontUsFilter.median() + ULTRASONIC_FRONT_FORWARD_OFFSET_CM
                          : 0.0f;
     } else {
+      rightDiagFresh = true;
       float rawCm = readUltrasonicCm(ULTRASONIC_RIGHT_45_TRIG_PIN,
                                      ULTRASONIC_RIGHT_45_ECHO_PIN, valid);
       if (valid) rightDiagUsFilter.push(rawCm);
@@ -185,17 +195,29 @@ void updateSensors() {
     nextUltrasonic ^= 1;
   }
 
-  if (telemetryOn && now - lastTelemetryMs >= SENSOR_TELEMETRY_INTERVAL_MS) {
+  if (stageSensorLogging ||
+      (telemetryOn && now - lastTelemetryMs >= SENSOR_TELEMETRY_INTERVAL_MS)) {
     lastTelemetryMs = now;
-    printTelemetry();
+    printTelemetry(frontFresh, rightDiagFresh);
   }
 }
 
 const SensorData &latestSensorData() { return data; }
+
+void resetDistanceFilters() {
+  leftLaserFilter.reset();
+  rightLaserFilter.reset();
+  frontUsFilter.reset();
+  rightDiagUsFilter.reset();
+  data.leftWallValid = data.rightWallValid = false;
+  data.frontValid = data.rightDiagValid = false;
+}
 
 void toggleSensorTelemetry() {
   telemetryOn = !telemetryOn;
   Serial.print(F("Sensor telemetry "));
   Serial.println(telemetryOn ? F("ON") : F("OFF"));
 }
+
+void setStageSensorLogging(bool enabled) { stageSensorLogging = enabled; }
 
