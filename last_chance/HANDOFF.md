@@ -2,6 +2,9 @@
 
 _Written 2026-09-26. Branch: `platformio-last-chance` on `https://github.com/JRKashani/Arduino`._
 
+_Sensor experiment update: 2026-10-17. Navigation test status below is historical;
+sensor measurements do not establish that navigation changes work on hardware._
+
 This document describes where the robot firmware stands, how to build/test it,
 how Stage 3 (wall following) works and how to tune it, what is still untested,
 and what to do next. Read sections 1–4 before touching the robot.
@@ -12,13 +15,17 @@ and what to do next. Read sections 1–4 before touching the robot.
 
 - `last_chance/` is now a **PlatformIO** project (not an Arduino-IDE sketch).
   Open **the `last_chance` folder** in VS Code with the PlatformIO extension.
+- Sensor experiments are separate firmware builds: `imu_tilt` and `distance_test`.
+  Use [distance instructions](docs/distance-test.md) and the
+  [results index](docs/distance-results-2026-10-11/README.md) for the completed
+  stationary tests. See section 3.6 for current calibration and graph status.
 - Working today on hardware: motors, all sensors (+ live telemetry), and
   **Stage 3: follow the right wall at 30 cm**, including 45° outside and inside
   corners. Stage 1 now implements wall approach, 90-degree turn and front/side
   equality, then hands off to Stage 2 for 45-degree alignment and funnel centering
   (2026-10-03; builds successfully, untested on hardware). Stages 4, 5 are
   **not implemented**.
-- The **last commit is untested on hardware** (anti-chatter, dead-zone
+- The **Stage 3 change `bff3bda` is untested on hardware** (anti-chatter, dead-zone
   compensation, 8 s search timeout). First job: test it (section 7.1).
 - **90° corners have not been tested.** Outside 90° corners are the biggest
   known risk (section 8).
@@ -45,7 +52,10 @@ fixed, so solutions must be general (do not tune to one practice layout).
 
 Grade: **70% documentation** (electronic schematic, flowcharts — overview +
 per-stage — and documented code, plus a presentation) and **30% performance**.
-The schematic and flowcharts **do not exist yet** (section 9).
+Sensor wiring diagrams now exist for the
+[IMU](docs/diagrams/imu-wiring.svg) and
+[three distance sensors on one Mega](docs/diagrams/distance-sensors-wiring.svg).
+The complete robot schematic and navigation flowcharts remain to be prepared (section 9).
 
 ---
 
@@ -67,6 +77,7 @@ accelerometer only — it measures tilt, not heading).
 | HC-SR04 right-45° | TRIG / ECHO | 51 / 50 |
 | LDR right / left | analog | A3 / A4 |
 | ADXL335 accel | X / Y / Z / 3.3 V reference | A2 / A1 / A0 / A5 |
+| Sharp GP2Y0A21YK0F (distance experiment) | Vo / supply / ground | A6 / 5 V / GND |
 | LEDs | red / green / white | 8 / 9 / 12 (not used by code yet) |
 
 ### 2.2 Geometry (measured by the team; center = IMU position)
@@ -90,8 +101,9 @@ long at 15°) — the lasers cannot see them**; Stage 4 must use IMU roll.
 - **IMU baseline moved between runs** (roll −3.2 / pitch 8.8 in one run,
   roll 5.0 / pitch 0.0 in another). If the robot was on the same flat spot both
   times, **the IMU mount may be loose**. Check before Stage 4.
-- The front ultrasonic reports `--` (no echo) for anything farther than ~170 cm
-  and sometimes for surfaces hit at a steep angle. This is normal.
+- The navigation firmware's 10 ms ultrasonic timeout limits echoes to roughly
+  172 cm. The separate distance test uses 30 ms and recorded accepted readings
+  at an entered 180 cm. Missing echoes can also depend on the target and angle.
 
 ---
 
@@ -164,6 +176,83 @@ loop:  updateSensors() → runMotionTest() (serial console) → runStageManager(
 
 **Keep the robot flat and still at power-up/reset** — the IMU calibrates its
 baseline then.
+
+### 3.6 Stationary sensor experiments and deliverables (2026-10-17)
+
+The normal `megaatmega2560` build runs navigation. `distance_test` runs only
+stationary collection with motor outputs held off; `imu_tilt` is the separate
+tilt experiment. Upload the intended environment explicitly. The last confirmed
+distance firmware is **1.2.0**; current firmware on the board must be checked
+at connection, rather than inferred from this document.
+
+Distance collection uses front US D43/D42, right laser SDA D20 / SCL D21 /
+XSHUT D22 (address 0x30), and IR output A6. All three distance modules use the
+user-confirmed 5 V supply and common GND. The diagram shows **one Arduino**,
+with the 5 V rail above and ground below. The ADXL335 uses **3.3 V**, not this
+distance-sensor supply; its A5 input monitors the same 3.3 V rail.
+
+Run from PowerShell in `last_chance` after closing other serial monitors:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\pio.exe" run -e distance_test -t upload --upload-port COM7
+& .\.venv\Scripts\python.exe -u tools\distance_test\distance_mission.py record --sensor us --port COM7
+```
+
+Use `--sensor laser` or `--sensor ir` for a new sensor session. The recorder is
+also the live monitor: one reading every 0.5 s, ten samples over five seconds
+per repeat, three repeats per entered tape distance. There is no fixed point
+count; enter another actual distance or finish. `.ps1` launchers can be blocked
+by this machine's execution policy, so use the direct Python commands. Only one
+program can hold COM7. Distances in these experiments are from the **sensor
+face**, unlike the robot-center navigation convention.
+
+Calibration status:
+
+- US uses the existing `cm = (echo_us / 58) * 1.01535 + 0.70910`, originally
+  measured over 15-150 cm. Principal run: 19 positions (8-180 cm), 570 included
+  samples; observed mean absolute error 0.51 cm against the entered tape values.
+- Laser firmware 1.2.0 uses long-range settings with a 33 ms budget. Its raw
+  output is mm, converted to cm without an empirical correction in firmware.
+  The graph-only experimental correction is
+  `corrected_cm = 0.969241451 * reported_cm - 0.699266228`, fitted to the original
+  16 positions (20-170 cm). Separate four-position follow-up MAE: 2.446 cm before,
+  0.904 cm after. Mounting changed around 60 cm; retain that caveat. This fit
+  **has not been applied to firmware** and is not full-range validation.
+- IR completed 15 positions (10-80 cm), 450 samples, with entered ADC reference
+  4.71 V. Display remains ADC and voltage: `V = ADC * reference_v / 1023`.
+  Output becomes ambiguous at farther distances (about 172 counts at both
+  40 and 80 cm), so no ADC-to-cm conversion is enabled.
+- The replacement ADXL335 remains the current IMU with the six-face constants
+  in `src/DEFINE.h`. Independent six-face validation was skipped by user choice;
+  the phone-derived proposal was not applied. See the
+  [replacement record](docs/imu-calibration-replacement-2026-10-11.md).
+
+Presentation files:
+
+- [Combined graph with experimental laser correction](docs/distance-results-2026-10-11/comparison-calibrated-laser/README.md).
+- [Three separate raw-output graphs](docs/distance-results-2026-10-11/raw-sensor-graphs/README.md):
+  US echo time with calculated cm on the second y-axis, laser mm, IR ADC counts.
+- [Single-Mega wiring PNG](docs/diagrams/distance-sensors-wiring.png), with SVG/PDF alongside it.
+
+The graph points average three accepted repeats. Vertical bars span individual
+accepted sample minima/maxima; horizontal bars are **±1 cm** (2 cm total), an
+assumed tape-measure uncertainty. These are not confidence intervals. This differs
+from the recorder export's three assignment curves, which show min/mean/max of
+the **repeat means**. Principal comparison plots use 1,500 accepted samples;
+separate laser follow-up captures are kept separate.
+
+Recreate figures without connecting the board:
+
+```powershell
+& .\.venv\Scripts\python.exe tools\distance_test\plot_comparison.py --calibrated-laser
+& .\.venv\Scripts\python.exe tools\distance_test\plot_raw_sensors.py
+& .\.venv\Scripts\python.exe docs\diagrams\generate_distance_wiring.py
+```
+
+Original sessions are written to ignored `distance_sessions/`; the retained
+archive is in `docs/distance-results-2026-10-11/`. Consult its index for missing
+sessions in this checkout and checksum scope. Preserve source records, inclusion
+flags, setup notes and calibration provenance when preparing new analyses.
 
 ---
 
@@ -296,7 +385,7 @@ specific practice wall.
 
 ## 7. Test status
 
-### 7.1 FIRST: test the untested last commit
+### 7.1 FIRST: test the Stage 3 change bff3bda
 
 The newest code commit `bff3bda` (anti-chatter + dead-zone + 8 s timeout) compiles and passes
 all host tests but has **not run on the robot**. Test on the 3×45 cm practice
@@ -354,7 +443,7 @@ wall (outside 45° corner, then inside 45° corner):
 
 ## 9. Next steps (suggested order)
 
-1. **Test the last commit** on the 45° wall (7.1). Commit a note of the result.
+1. **Test the Stage 3 change `bff3bda`** on the 45° wall (7.1). Commit a note of the result.
 2. **Rebuild the practice wall with 90° corners** (outside and inside, also
    swap their order). Tune with the knobs in 6.5 — the **same values must work
    on all layouts**.

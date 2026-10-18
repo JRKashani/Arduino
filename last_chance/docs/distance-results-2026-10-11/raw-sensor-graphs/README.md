@@ -1,5 +1,15 @@
 # Individual sensor raw-output graphs
 
+[IR comparison with the user-supplied reference curve](ir-with-reference.png)
+([PDF](ir-with-reference.pdf), [SVG](ir-with-reference.svg)) overlays an approximate
+manual trace of the supplied voltage plot behind the original measured data and
+error bars. The reference voltage is converted to equivalent ADC counts using
+the recorded 4.71 V reference; the right axis also displays voltage. Source-image
+conditions are unknown and no calibration is fitted to this reference. Approximate
+reference coordinates are retained in `ir-reference-trace.csv`; provenance and
+input hashes are in `ir-reference-sources.json`. Regenerate with
+`python tools/distance_test/plot_ir_reference.py` from the project folder.
+
 The [combined graph with experimental laser calibration](../comparison-calibrated-laser/three-sensor-characteristic.png) is preserved unchanged. These additional figures show raw outputs from the same principal sessions.
 
 [All three graphs as a PDF](raw-sensor-graphs.pdf) | [Plotted data](plotted-data.csv)

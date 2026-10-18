@@ -17,12 +17,15 @@ actual measurement; plots use 198.7.
 
 [Wiring diagram (PNG)](diagrams/distance-sensors-wiring.png) ·
 [SVG](diagrams/distance-sensors-wiring.svg) · [PDF](diagrams/distance-sensors-wiring.pdf).
-The laser module uses the user-confirmed 5 V supply; power-pin names follow the module labels.
+The diagram shows **one Arduino Mega 2560** connected to all three sensors,
+with a shared 5 V rail above and common ground below. The laser module uses the
+user-confirmed 5 V supply; power-pin names follow the module labels. The IMU's
+separate 3.3 V supply is not shown.
 
 | Sensor | Existing / new connection |
 |---|---|
 | Front HC-SR04 | TRIG 43, ECHO 42; existing 5 V and GND |
-| Right VL53L0X | Existing SDA 20, SCL 21, XSHUT 22, address 0x30 |
+| Right VL53L0X | SDA 20, SCL 21, XSHUT 22, address 0x30; module VIN/VCC to confirmed 5 V, GND common |
 | Sharp analog IR | **Vo/output to A6**, Vcc to **5 V**, GND to Arduino GND |
 
 A0-A5 are already assigned to the IMU, its supply monitor and the LDRs. A6 is
@@ -55,7 +58,7 @@ captures of ten samples, one sample every **0.5 seconds**. Each repeat spans
 of recording per distance**, plus time spent confirming repeats. The US timeout
 is 30 ms, allowing the roughly 11.6 ms round-trip at 2 m;
 the navigation firmware's 10 ms timeout would cut off before that endpoint.
-Laser single-shot readings use the existing library's default profile with a
+Laser single-shot readings use the long-range profile in firmware 1.2.0 with a
 33 ms timing budget. Actual sample timestamps are saved if a slow read overruns
 the requested interval. No median filter or previous-position data are reused.
 
@@ -166,6 +169,23 @@ Arduino 5 V rail voltage improves the approximate ADC-to-volts conversion:
 `V = ADC * reference_v / 1023`. Enter leaves a clearly labeled nominal 5.0 V.
 This is a recorded reference assumption, not a live measurement of AVCC.
 
+The completed IR run used a measured reference of **4.71 V** and has 450 samples
+at 15 distances from 10 to 80 cm. Its ADC response flattens and reverses at farther
+distances; about 172 counts occurs at both 40 and 80 cm. A single ADC-to-distance
+lookup would be ambiguous. Live output therefore remains ADC/voltage, with no
+automatic cm conversion. Use this run as a measured characteristic, not a
+validated distance calibration.
+
+The optional **graph-only laser correction** is
+`corrected_cm = 0.969241451 * reported_cm - 0.699266228`.
+It was fitted to 16 position means over 20-170 cm. The original laser mount was
+straightened around 60 cm; the exact transition is uncertain. The separate
+50/60/70/91 cm follow-up was not used to fit coefficients: its mean absolute error
+decreases from 2.446 to 0.904 cm. This is a limited consistency check with the
+same tape reference. The correction is not applied to firmware, recorder output,
+or the raw laser graphs. Retain the mount-change note and avoid treating training
+residuals as independent accuracy validation.
+
 The session directory contains `session.json`, append-only `events-*.jsonl` and
 `serial-*.log`. Source data are flushed after each received sample. Each export
 goes into a new `analysis/TIMESTAMP` directory:
@@ -190,6 +210,44 @@ Regenerate an export with:
 ```powershell
 & .\.venv\Scripts\python.exe tools\distance_test\distance_mission.py analyze "distance_sessions\YOUR_SESSION"
 ```
+
+## Completed results and presentation graphs
+
+Start with the [results index](distance-results-2026-10-11/README.md), which links
+the retained source sessions, workbooks, CSVs and reviews. The principal graph
+data are 19 US positions, 16 laser positions and 15 IR positions: **1,500 accepted
+samples**. Rejected attempts and the separate laser follow-up remain outside
+these curves.
+
+| Deliverable | Units and treatment |
+|---|---|
+| [Combined graph with experimental laser correction](distance-results-2026-10-11/comparison-calibrated-laser/README.md) | IR ADC on left y-axis; calibrated US cm and experimentally corrected laser cm on right |
+| [Combined graph without laser correction](distance-results-2026-10-11/comparison/README.md) | Same layout; laser is reported mm divided by 10 |
+| [Three individual raw graphs and PDF](distance-results-2026-10-11/raw-sensor-graphs/README.md) | US echo µs, laser reported mm, IR ADC; US right y-axis shows `(echo_us / 58) * 1.01535 + 0.70910` cm |
+| [Single-Arduino wiring diagram](diagrams/distance-sensors-wiring.png) | Front US, right laser and IR on one Mega; SVG/PDF also available |
+
+For these presentation graphs, each point is the mean of three accepted repeat
+means. **Vertical bars span the minimum and maximum individual accepted samples**;
+the separate raw graphs also show those samples as faint dots. Horizontal bars
+are **±1 cm**, representing the assumed tape uncertainty (2 cm total width).
+They are not confidence intervals. Corrected laser sample extrema use the same
+scale and offset as their means; fit-coefficient uncertainty is not included.
+The combined graph's independent y-scales mean intersections do not indicate
+equal numerical readings. The recorder's original three assignment curves use
+the range of repeat means instead; do not confuse the two definitions.
+
+Rebuild graphs and wiring from the archived records without opening COM7:
+
+```powershell
+& .\.venv\Scripts\python.exe tools\distance_test\plot_comparison.py
+& .\.venv\Scripts\python.exe tools\distance_test\plot_comparison.py --calibrated-laser
+& .\.venv\Scripts\python.exe tools\distance_test\plot_raw_sensors.py
+& .\.venv\Scripts\python.exe docs\diagrams\generate_distance_wiring.py
+```
+
+These commands create PNG/SVG/PDF figures; the graph directories also contain
+plotted-data CSVs and source hashes. The corrected graph adds a calibration JSON
+with coefficients and residuals. Source session records remain unchanged.
 
 ## Sources
 

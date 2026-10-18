@@ -2,6 +2,11 @@
 
 Archived measurements, raw records and reviews: [distance results](docs/distance-results-2026-10-11/README.md).
 
+Distance deliverables: [combined graph with experimental laser calibration](docs/distance-results-2026-10-11/comparison-calibrated-laser/README.md),
+[three raw-output graphs](docs/distance-results-2026-10-11/raw-sensor-graphs/README.md), and
+[single-Arduino wiring diagram](docs/diagrams/distance-sensors-wiring.svg).
+The laser correction is used only in the graph; firmware remains unchanged.
+
 Distance-sensor assignment: [guided US / right-laser / analog-IR test](docs/distance-test.md).
 Build/upload `distance_test`, then run the recorder directly from PowerShell:
 `& .\.venv\Scripts\python.exe -u tools\distance_test\distance_mission.py record --sensor us --port COM7`.
