@@ -20,7 +20,7 @@ Input hashes are in sources-sha256.json; archived source files remain unchanged.
 
 `corrected_cm = 0.969241451 * reported_cm -0.699266228`
 
-Fit by ordinary least squares to the 16 position means of the original 20-170 cm laser run, with equal weight per position. This includes the reported mounting change near 60 cm, so treat the result as an experimental correction for this dataset. It has not been applied to firmware.
+Fit by ordinary least squares to the 16 position means of the original 20-170 cm laser run, with equal weight per position. This includes the reported mounting change near 60 cm, so treat the result as an experimental correction for this dataset. It was not applied to firmware when this analysis was made; since 2026-10-27 the robot firmware applies it to both side lasers.
 
 Training mean absolute error: 3.736 cm before, 0.451 cm after. These same-data residuals do not establish independent accuracy.
 

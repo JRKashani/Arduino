@@ -4,3 +4,4 @@ build/
 __pycache__/
 imu_tilt_sessions/
 distance_sessions/
+manual_sessions/

@@ -7,7 +7,7 @@
 //
 // Distances are CENTER-RELATIVE where the geometry is a simple offset:
 //   - side lasers report distance from the robot center to the wall
-//     (raw laser reading + LASER_LATERAL_OFFSET_CM),
+//     (calibrated laser reading + LASER_LATERAL_OFFSET_CM),
 //   - the nose ultrasonic reports distance from the center to the obstacle
 //     ahead (raw reading + ULTRASONIC_FRONT_FORWARD_OFFSET_CM).
 // The right-45 degree ultrasonic is reported as its raw slant distance: it is
@@ -33,6 +33,8 @@ struct SensorData {
   bool  rightDiagValid;
   float frontRawCm;      // raw (uncorrected-for-offset) readings for diagnostics
   float rightDiagRawCm;
+  bool  frontFresh;      // this update pinged the front sensor
+  bool  rightDiagFresh;  // this update pinged the right-45 sensor
 
   // LDR light sensors (raw ADC 0..1023) and left-minus-right difference.
   int ldrLeft;

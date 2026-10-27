@@ -15,6 +15,10 @@ and what to do next. Read sections 1–4 before touching the robot.
 
 - `last_chance/` is now a **PlatformIO** project (not an Arduino-IDE sketch).
   Open **the `last_chance` folder** in VS Code with the PlatformIO extension.
+- **Manual drive logger** (`manual_drive` build, 2026-10-27): drive the robot from
+  the PC keyboard while every sensor update is recorded and labelled by track
+  segment. Used to establish the expected sensor values per segment.
+  See [manual drive instructions](docs/manual-drive.md).
 - Sensor experiments are separate firmware builds: `imu_tilt` and `distance_test`.
   Use [distance instructions](docs/distance-test.md) and the
   [results index](docs/distance-results-2026-10-11/README.md) for the completed
@@ -101,9 +105,9 @@ long at 15°) — the lasers cannot see them**; Stage 4 must use IMU roll.
 - **IMU baseline moved between runs** (roll −3.2 / pitch 8.8 in one run,
   roll 5.0 / pitch 0.0 in another). If the robot was on the same flat spot both
   times, **the IMU mount may be loose**. Check before Stage 4.
-- The navigation firmware's 10 ms ultrasonic timeout limits echoes to roughly
-  172 cm. The separate distance test uses 30 ms and recorded accepted readings
-  at an entered 180 cm. Missing echoes can also depend on the target and angle.
+- The navigation firmware's ultrasonic timeout is 12 ms (was 10 ms, ~172 cm),
+  which covers the validated 180 cm. The separate distance test uses 30 ms.
+  Missing echoes can also depend on the target and angle.
 
 ---
 
@@ -158,8 +162,11 @@ last_chance/
 │   ├── MotionCapsule.*     motors: timed moves (F/L/R) + driveContinuous()
 │   ├── MotionTest.*        serial console (commands in section 4)
 │   ├── StageManager.*      stage dispatch, safety stop, Stage 3 logic
-│   └── Log.h               rate-limited logging macros
+│   ├── Log.h               rate-limited logging macros
+│   └── manual_drive/       manual drive logger build (link, drive, sample log)
 ├── lib/Control/            pure math (PD, ramps, slew…) — unit-tested on the PC
+├── lib/ManualCommand/      manual drive protocol + safety/watchdog rules (host-tested)
+├── tools/manual_drive/     PC keyboard driver, recorder, summary and plots
 └── test/test_native/       unit tests for lib/Control
 ```
 
@@ -213,11 +220,17 @@ Calibration status:
   samples; observed mean absolute error 0.51 cm against the entered tape values.
 - Laser firmware 1.2.0 uses long-range settings with a 33 ms budget. Its raw
   output is mm, converted to cm without an empirical correction in firmware.
-  The graph-only experimental correction is
+  The experimental correction is
   `corrected_cm = 0.969241451 * reported_cm - 0.699266228`, fitted to the original
   16 positions (20-170 cm). Separate four-position follow-up MAE: 2.446 cm before,
-  0.904 cm after. Mounting changed around 60 cm; retain that caveat. This fit
-  **has not been applied to firmware** and is not full-range validation.
+  0.904 cm after. Mounting changed around 60 cm; retain that caveat. It is not
+  full-range validation.
+- **Since 2026-10-27 the navigation and manual_drive firmware apply this
+  correction** (`LASER_DISTANCE_SCALE/OFFSET_CM` in `src/DEFINE.h`) to **both**
+  side lasers and run both with the same long-range profile it was measured
+  with. The left laser was never measured; it is assumed to behave the same.
+  Readings near 30 cm drop by about 2 cm compared with before, so Stage 3 now
+  holds the true 30 cm. Re-check Stage 3 on the robot.
 - IR completed 15 positions (10-80 cm), 450 samples, with entered ADC reference
   4.71 V. Display remains ADC and voltage: `V = ADC * reference_v / 1023`.
   Output becomes ambiguous at farther distances (about 172 counts at both
@@ -280,7 +293,7 @@ press `X`.
 SENS Lwall=31.2cm Rwall=29.8cm (raw L/R mm=300/286) Front=85.0cm R45=36.1cm LDR L/R/diff=512/498/14
 ```
 
-- `Lwall`/`Rwall`: distance from **robot center** to the wall (raw + 1.2 cm).
+- `Lwall`/`Rwall`: distance from **robot center** to the wall (calibrated laser + 1.2 cm).
 - `Front`: from **robot center** to the obstacle ahead (raw + 10 cm).
 - `R45`: raw slant distance of the 45° sensor (no conversion). On a straight
   wall with the robot at 30 cm it reads ≈ 35 cm.

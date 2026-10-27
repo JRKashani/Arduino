@@ -21,16 +21,29 @@ const uint8_t LASER_RIGHT_ADDRESS = 0x30;
 const uint8_t LASER_LEFT_ADDRESS = 0x31;
 const int LASER_MAX_VALID_DISTANCE_MM = 2000;
 const int LASER_WALL_GONE_THRESHOLD_MM = 700;
+// Ranging profile used in the 2026-10-11 distance experiment (Pololu long-range
+// settings). The correction below was fitted under this profile, so both lasers
+// run it. Source: docs/distance-results-2026-10-11/comparison-calibrated-laser/.
+const float LASER_SIGNAL_RATE_LIMIT_MCPS = 0.1f;
+const uint8_t LASER_VCSEL_PRE_RANGE_PCLKS = 18;
+const uint8_t LASER_VCSEL_FINAL_RANGE_PCLKS = 14;
+const uint32_t LASER_TIMING_BUDGET_US = 33000UL;
+// corrected_cm = scale * reported_cm + offset, measured from the sensor face.
+// Fitted on the RIGHT laser over 20-170 cm (MAE 3.74 -> 0.45 cm; follow-up
+// 2.45 -> 0.90 cm). Applied to the left laser too: same model, not measured.
+const float LASER_DISTANCE_SCALE = 0.969241451f;
+const float LASER_DISTANCE_OFFSET_CM = -0.699266228f;
 
 // HC-SR04 pins, timing and calibration
 const uint8_t ULTRASONIC_FRONT_TRIG_PIN = 43;
 const uint8_t ULTRASONIC_FRONT_ECHO_PIN = 42;
 const uint8_t ULTRASONIC_RIGHT_45_TRIG_PIN = 51;
 const uint8_t ULTRASONIC_RIGHT_45_ECHO_PIN = 50;
-const unsigned long ULTRASONIC_ECHO_TIMEOUT_US = 10000UL;
+// 12 ms covers the validated 180 cm (~10.4 ms echo) with margin; was 10 ms (~172 cm).
+const unsigned long ULTRASONIC_ECHO_TIMEOUT_US = 12000UL;
 const unsigned long ULTRASONIC_MIN_INTERVAL_MS = 60;
-// Calibration from measurements spanning 15-150 cm:
-// corrected distance = measured distance * scale + offset.
+// corrected distance = measured distance * scale + offset (fitted 15-150 cm).
+// Re-checked 2026-10-11 over 8-180 cm: 570 samples, MAE 0.51 cm, unchanged.
 const float ULTRASONIC_DISTANCE_SCALE = 1.01535f;
 const float ULTRASONIC_DISTANCE_OFFSET_CM = 0.70910f;
 
@@ -129,6 +142,11 @@ const unsigned long STAGE_LOG_INTERVAL_MS = 250UL;
 // Safety stop (front obstacle) while a stage runs
 constexpr float FRONT_EMERGENCY_STOP_CM = 20.0;
 const float FRONT_EMERGENCY_CLEAR_CM = 30.0;
+
+// Manual drive logger (env:manual_drive): PC-led driving while recording.
+const int MANUAL_MAX_SPEED = 120;                // |speed| accepted from the PC
+const int MANUAL_MAX_STEER = 80;                 // |steer| accepted from the PC
+const unsigned long MANUAL_WATCHDOG_MS = 600UL;  // stop if the PC goes silent
 
 // Stage 4
 const float TILT_TOLERANCE_DEG = 5.0;

@@ -5,7 +5,11 @@ Archived measurements, raw records and reviews: [distance results](docs/distance
 Distance deliverables: [combined graph with experimental laser calibration](docs/distance-results-2026-10-11/comparison-calibrated-laser/README.md),
 [three raw-output graphs](docs/distance-results-2026-10-11/raw-sensor-graphs/README.md), and
 [single-Arduino wiring diagram](docs/diagrams/distance-sensors-wiring.svg).
-The laser correction is used only in the graph; firmware remains unchanged.
+The laser correction is now applied in firmware to both side lasers (see `src/DEFINE.h`).
+
+Manual drive logger: drive the robot from the PC keyboard while every sensor
+update is recorded, then summarize expected values per track segment. See
+[manual drive instructions](docs/manual-drive.md).
 
 Distance-sensor assignment: [guided US / right-laser / analog-IR test](docs/distance-test.md).
 Build/upload `distance_test`, then run the recorder directly from PowerShell:

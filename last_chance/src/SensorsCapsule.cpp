@@ -57,14 +57,29 @@ unsigned long lastTelemetryMs = 0;
 // Enable a VL53L0X: hold XSHUT low to shut down, then release to high-Z so the
 // breakout's pull-up raises it to the sensor's 2.8 V logic (never drive it HIGH
 // from a 5 V pin). Init at the default 0x29, then move it to a unique address.
+// Same ranging profile as the calibration experiment (see DEFINE.h).
+bool applyLaserProfile(VL53L0X &dev) {
+  return dev.setSignalRateLimit(LASER_SIGNAL_RATE_LIMIT_MCPS) &&
+         dev.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, LASER_VCSEL_PRE_RANGE_PCLKS) &&
+         dev.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, LASER_VCSEL_FINAL_RANGE_PCLKS) &&
+         dev.setMeasurementTimingBudget(LASER_TIMING_BUDGET_US);
+}
+
 bool bringUpLaser(VL53L0X &dev, uint8_t xshutPin, uint8_t address) {
   pinMode(xshutPin, INPUT); // release -> enabled
   delay(10);
   dev.setTimeout(500);
   if (!dev.init()) return false;
   dev.setAddress(address);
+  if (!applyLaserProfile(dev)) return false;
   dev.startContinuous();
   return true;
+}
+
+// Calibrated sensor-face cm, then shifted to the robot center.
+float laserCenterCm(float reportedMm) {
+  const float faceCm = LASER_DISTANCE_SCALE * (reportedMm / 10.0f) + LASER_DISTANCE_OFFSET_CM;
+  return faceCm + LASER_LATERAL_OFFSET_CM;
 }
 
 float readUltrasonicCm(uint8_t trigPin, uint8_t echoPin, bool &valid) {
@@ -88,8 +103,8 @@ void readLaser(VL53L0X &dev, bool ok, MedianFilter &filter,
   bool valid = !dev.timeoutOccurred() && mm > 0 && mm <= LASER_MAX_VALID_DISTANCE_MM;
   if (valid) filter.push((float)mm);
   outValid = valid && filter.ready();
-  // Convert filtered raw mm to center-relative cm (laser sits toward the wall).
-  outCm = outValid ? (filter.median() / 10.0f + LASER_LATERAL_OFFSET_CM) : 0.0f;
+  // Filtered raw mm -> calibrated, center-relative cm (laser sits toward the wall).
+  outCm = outValid ? laserCenterCm(filter.median()) : 0.0f;
 }
 
 void printField(const char *label, float value, bool valid, const char *unit) {
@@ -153,7 +168,8 @@ bool setupSensors() {
 
 void updateSensors() {
   const unsigned long now = millis();
-  bool frontFresh = false, rightDiagFresh = false;
+  bool &frontFresh = data.frontFresh, &rightDiagFresh = data.rightDiagFresh;
+  frontFresh = rightDiagFresh = false;
   data.timestampMs = now;
 
   // Lasers (read every call; continuous mode). NOTE: readRange* blocks until a
