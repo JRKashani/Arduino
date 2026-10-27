@@ -1,0 +1,15 @@
+{"kind": "connection", "utc": "2026-10-11T13:41:03.222070+00:00", "firmware_version": "1.0.0", "firmware_config": {"US_SCALE": "1.015350", "US_OFFSET_CM": "0.709100", "US_TIMEOUT_US": "30000", "US_CALIBRATION_RANGE_CM": "15:150", "IR_PIN": "A6", "IR_MODEL": "GP2Y0A21YK0F", "ADC_REFERENCE": "AVCC", "LASER_PROFILE": "default_33ms_single_shot", "DISTANCE_ORIGIN": "sensor_face"}}
+{"kind": "point", "utc": "2026-10-11T13:46:05.375782+00:00", "point_id": "2d2e0a82a0844c6d9f750905f05c7ea4", "point_index": 1, "target_cm": 200, "actual_cm": 200.0}
+{"kind": "capture", "utc": "2026-10-11T13:46:23.261851+00:00", "capture_id": 1, "point_id": "2d2e0a82a0844c6d9f750905f05c7ea4", "repeat": 1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.295536+00:00", "capture_id": 1, "sequence": 0, "timestamp_ms": 322189, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.392494+00:00", "capture_id": 1, "sequence": 1, "timestamp_ms": 322289, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.489038+00:00", "capture_id": 1, "sequence": 2, "timestamp_ms": 322390, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.585858+00:00", "capture_id": 1, "sequence": 3, "timestamp_ms": 322490, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.698346+00:00", "capture_id": 1, "sequence": 4, "timestamp_ms": 322590, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.794709+00:00", "capture_id": 1, "sequence": 5, "timestamp_ms": 322690, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.891712+00:00", "capture_id": 1, "sequence": 6, "timestamp_ms": 322790, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:24.988417+00:00", "capture_id": 1, "sequence": 7, "timestamp_ms": 322890, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:25.086151+00:00", "capture_id": 1, "sequence": 8, "timestamp_ms": 322990, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "sample", "utc": "2026-10-11T13:46:25.182716+00:00", "capture_id": 1, "sequence": 9, "timestamp_ms": 323090, "raw": 0, "valid": false, "status": "NO_ECHO", "device_status": -1}
+{"kind": "capture_complete", "utc": "2026-10-11T13:46:25.198798+00:00", "capture_id": 1}
+{"kind": "review", "utc": "2026-10-11T13:46:37.161714+00:00", "capture_id": 1, "decision": "skipped"}

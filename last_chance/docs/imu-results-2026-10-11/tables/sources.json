@@ -1,0 +1,31 @@
+{
+  "placement_sha256": "4dabb9a727e75b856bf4406a294d46075458289d77402608348cee0cb35033e2",
+  "reference_sha256": "8510c742f9c52a4a7a2b485e969ea6c7fb887596b432cc5d5f5865d89d833b72",
+  "calibration": {
+    "status": "provisional_validation_skipped_by_user",
+    "source_session": "imu_tilt_sessions/20261011T085956_819855Z_six_face",
+    "sensor": "replacement ADXL335, direct ground jumper",
+    "candidate_constants": {
+      "x_zero": 0.49385493463403934,
+      "y_zero": 0.5003884896706072,
+      "z_zero": 0.4923881577088629,
+      "x_per_g": 0.10187029523592023,
+      "y_per_g": 0.10271053839681996,
+      "z_per_g": 0.10215842517472598
+    },
+    "previous_constants": {
+      "x_zero": 0.50290918,
+      "y_zero": 0.49537615,
+      "z_zero": 0.50094098,
+      "x_per_g": 0.10327006,
+      "y_per_g": 0.10375069,
+      "z_per_g": 0.0980555
+    },
+    "training_max_vector_error_g": 0.09318820334022763,
+    "training_passed": true,
+    "validation_performed": false,
+    "purpose": "Collect five household slopes with phone estimates, then assess calibration using those measurements."
+  },
+  "flat_placement_groups": 6,
+  "g_conversion": "Per-sample firmware acceleration means, using the acquisition calibration; no proposed recalibration applied."
+}

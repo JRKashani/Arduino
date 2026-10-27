@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-11T13:41:01.190940+00:00",
+  "sensor": "us",
+  "sensor_description": "Front HC-SR04",
+  "simulated": false,
+  "points_cm": [
+    200,
+    175,
+    150,
+    125,
+    100,
+    80,
+    60,
+    50,
+    40,
+    30,
+    25,
+    20,
+    15,
+    10
+  ],
+  "repeats": 3,
+  "samples_per_capture": 10,
+  "period_ms": 100,
+  "settle_ms": 1000,
+  "distance_origin": "sensor_face",
+  "adc_reference_v": 5.0,
+  "adc_reference_source": "nominal",
+  "firmware_config": {
+    "US_SCALE": "1.015350",
+    "US_OFFSET_CM": "0.709100",
+    "US_TIMEOUT_US": "30000",
+    "US_CALIBRATION_RANGE_CM": "15:150",
+    "IR_PIN": "A6",
+    "IR_MODEL": "GP2Y0A21YK0F",
+    "ADC_REFERENCE": "AVCC",
+    "LASER_PROFILE": "default_33ms_single_shot",
+    "DISTANCE_ORIGIN": "sensor_face"
+  },
+  "firmware_version": "1.0.0",
+  "setup_notes": ""
+}

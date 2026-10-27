@@ -1,0 +1,4 @@
+# Preserve measurement CSV bytes so recorded source hashes survive checkout.
+docs/imu-results-2026-10-11/*.csv -text whitespace=cr-at-eol
+docs/imu-results-2026-10-11/tables/*.csv -text whitespace=cr-at-eol
+docs/distance-results-2026-10-11/** -text -whitespace

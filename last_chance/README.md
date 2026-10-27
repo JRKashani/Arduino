@@ -1,100 +1,86 @@
 # last_chance
 
-Open `last_chance.ino` in this folder and select Arduino Mega 2560.
-The initially empty nested sketch was relocated here beside `DEFINE.h`.
-The `ADXL335_IMU` library lives in `../libraries/ADXL335_IMU`, alongside the
-steering, ultrasonic and ToF libraries.
+Archived measurements, raw records and reviews: [distance results](docs/distance-results-2026-10-11/README.md).
 
-The first capsule is `ImuCapsule.cpp`:
+Distance deliverables: [combined graph with experimental laser calibration](docs/distance-results-2026-10-11/comparison-calibrated-laser/README.md),
+[three raw-output graphs](docs/distance-results-2026-10-11/raw-sensor-graphs/README.md), and
+[single-Arduino wiring diagram](docs/diagrams/distance-sensors-wiring.svg).
+The laser correction is used only in the graph; firmware remains unchanged.
 
-- `setupImuCapsule()` initializes the sensor and establishes the flat baseline.
-- `runImuCapsule()` refreshes readings and prints diagnostics every 200 ms.
-- `latestImuReading()` exposes the latest sample for future stage functions;
-  check its `valid` flag before using it.
+Distance-sensor assignment: [guided US / right-laser / analog-IR test](docs/distance-test.md).
+Build/upload `distance_test`, then run the recorder directly from PowerShell:
+`& .\.venv\Scripts\python.exe -u tools\distance_test\distance_mission.py record --sensor us --port COM7`.
 
-Edit the six empirical calibration weights, wiring, baseline sampling and print
-interval in `DEFINE.h`. Values from the previous project have been preserved.
-Open Serial Monitor at **115200 baud**, place the robot flat and still, and reset.
-After calibration, robot roll and pitch should be near zero. Tilt each axis and
-check its sign. Diagnostics include raw X/Y/Z/reference counts and acceleration.
-If baseline calibration fails, correct the wiring and reset to retry.
+Standalone stationary IMU experiment: see
+[the tilt mission instructions](docs/imu-tilt-mission.md). Build/upload with
+`pio run -e imu_tilt -t upload`, then use the guided recorder in
+`tools/imu_tilt/tilt_mission.py`. The normal robot firmware is the default build.
 
-IMU sampling continues during motion, but periodic printing defaults to off.
-Set IMU_PRINT_ENABLED in DEFINE.h to true to see IMU diagnostics again.
+The replacement ADXL335 is the current robot sensor. Its active six-face
+calibration and wiring are documented in
+[the sensor record](docs/imu-calibration-replacement-2026-10-11.md).
+The [five-slope results](docs/imu-results-2026-10-11/comparison-review.md) and
+[raw ADC / g tables](docs/imu-results-2026-10-11/tables/measured-tables.md)
+use that calibration; the phone-derived proposal has not been applied.
+The [full sample CSV](docs/imu-results-2026-10-11/samples.csv) contains all
+25,500 samples, including raw ADC readings and calibrated acceleration in g.
 
-## Motion capsule tests
+Robot firmware for the Braude mechatronics final project (Arduino Mega 2560),
+built with PlatformIO. **Read [HANDOFF.md](HANDOFF.md)** for the full project
+state, hardware map, Stage 3 design, tuning guide and next steps.
 
-Upload last_chance.ino to Mega 2560, then open Serial Monitor at 115200 baud.
-Keep the robot flat and still until startup IMU calibration finishes and the
-motion menu appears. The motors start only after a command. Any line ending works.
+Quick start (from this folder):
 
-| Command | Action |
-| --- | --- |
-| F | Drive forward 60 cm using the timed speed estimate |
-| L | Left quarter-circle, nominal radius 60 cm |
-| R | Right quarter-circle, approximately 3-5 cm tighter radius |
-| S | Stop or cancel the countdown; lowercase s also works |
-| H / ? | Menu |
+| What | Command |
+|---|---|
+| Build | `pio run` |
+| Upload to the Mega | `pio run -t upload` |
+| Serial console (115200) | `pio device monitor` |
+| Host unit tests | `pio test -e native` |
 
-Each movement starts after a two-second countdown and stops automatically.
-Send one command at a time and reposition by hand between tests. Any non-whitespace
-command during an active test cancels it; send the next command again afterward.
-S discards input already queued. These tests have no ultrasonic obstacle stop.
+Keep the robot flat and still at reset (IMU calibration). In the console:
+`T` telemetry, `1` run Stage 1 (open area, then Stage 2), `2` run Stage 2
+(funnel, starting already aligned), `3` run Stage 3
+(right-wall follow), `X` stop, `H` help.
 
-The capsule uses PWM 60, bias -8, forward speed 60/3.883 cm/s, left harshness +10
-for 5856 ms, and right harshness -10 for 5343 ms. Parameters are in DEFINE.h.
-The older MOTOR_SPEED_SCALE/OFFSET formula is retained for reference; motion uses
-the newer fixed-PWM measurement. Times exclude the countdown. The circle times
-were measured with a manual stop, so verify actual angles with automatic stopping.
-Distance/heading are timed estimates, not encoder or yaw feedback.
+Stage 1 starts within 1.5 m of the funnel entrance, facing either wall. It drives
+straight until the front wall is 30 cm from the robot center, stops, compares the
+left/right lasers, and turns 90 degrees toward the closer side. It then uses the
+side laser facing the original forward wall (right after a left turn, left after
+a right turn), driving until front and that side agree within 2 cm or cross.
+If front is already shorter at the first comparison, it stops for repositioning.
+At equality, Stage 1 ends and automatically hands off to Stage 2 (funnel).
+Stage 2 turns back 45 degrees, then drives forward while comparing both sides.
+When they differ by more than 2 cm, it stops, turns 45 degrees toward the farther
+wall, drives 5 cm, turns back 45 degrees, and measures again. Filters are cleared
+and refilled for 700 ms after maneuvers. Stage 2 has no end condition yet;
+`S`/`X` stops, and the front emergency stop cancels either stage.
+To test only the funnel, place the robot already facing along the funnel and
+send `2`; this direct start skips the 45-degree entry turn.
 
-API for future independent stages:
+Change `STAGE1_WALL_TARGET_CM`, `STAGE1_EQUAL_TOLERANCE_CM`,
+`STAGE2_EQUAL_TOLERANCE_CM`, `STAGE2_CORRECTION_DISTANCE_CM`, and
+`ENTRY_MEASURE_SETTLE_MS` in `src/DEFINE.h`
+to tune this sequence. Invalid readings pause measurement-based forward motion;
+missing or equal initial side readings keep it stopped until comparison is possible.
+Turns use the measured PWM 60, bias 0, harshness +50/-50 row (852 ms left,
+903 ms right for 90 degrees), without countdown. The 45-degree times are scaled
+estimates (426 ms left, 452 ms right), not separately measured calibration.
+The 5 cm move uses the PWM 60 / bias -8 distance row (~324 ms). Short moves and
+the full sequence need verification on hardware.
 
-```cpp
-driveCm(60.0f);
-// Or, when idle:
-turnQuarterCircle(TurnDirection::Right);
-```
+All pins, calibration and tuning constants: `src/DEFINE.h`
+(motor calibration tables: `src/MotorCalibration.h`).
 
-Both return true if accepted, false if busy or invalid. driveCm accepts positive
-forward distances up to MOTION_MAX_DISTANCE_CM (120 cm by default), with durations
-between 1 and 30000 ms. Short distances need validation for startup/coasting effects.
-Call runMotionCapsule() frequently in loop(); motionBusy() includes the countdown.
-stopMotion() stops/cancels immediately. There is no movement queue. Replace the
-Serial test driver with individual mission-stage functions when ready.
-
-## Motor calibration tables in DEFINE.h
-
-- MOTOR_DISTANCE_120CM: all 12 initial PWM/time measurements; bias was not recorded.
-- MOTOR_DISTANCE_60CM: 13 PWM/bias groups, mean times and sample counts. Bias +10
-  is excluded as requested. Different biases are never pooled.
-- MOTOR_TURN_90DEG and MOTOR_TURN_180DEG: per-direction median times, signed
-  harshness, PWM, bias and sample counts, using only the replacement turn dataset.
-- MOTOR_ARC_60CM_RADIUS: accepted 90-degree arc profile at PWM 60 / bias -8.
-- MOTOR_ARC_EXPLORATORY: the two initial bias-0 arc trials for reference only;
-  their target radius was not achieved consistently, so they are not active.
-
-Distance rows expose msPerCm() and cmPerSecond(). For a matching PWM and bias,
-estimated time_ms = requested_distance_cm * row.msPerCm(). Turn rows expose
-leftMsPerDegree() and rightMsPerDegree(); multiplying by a requested angle gives
-an unverified scaled estimate. Prefer the directly measured 90/180-degree times.
-There is no single verified PWM/harshness-to-angle formula or general curve model.
-
-The existing 0.28198 * PWM - 1.67262 cm/s fit remains available with its explicit
-PWM 30-100 bounds. It was fitted to the initial 120 cm data, not the later bias -8
-trials. Active motion parameters now derive directly from the selected distance
-and arc table rows. Compile-time checks reject mismatched PWM/bias profiles.
-The measured baseline F/L/R times are 3883/5856/5343 ms at PWM 60, bias -8.
-
-### Current automatic-test adjustments
-
-After straight travel drifted left and right turns overshot by about 10 cm:
-- F uses MOTION_STRAIGHT_BIAS_TRIM=-2, giving effective bias -10; time stays 3883 ms.
-- L retains bias -8, harshness +10 and 5856 ms.
-- R retains bias -8 and harshness -10, with MOTION_RIGHT_TIME_TRIM_MS=-650,
-  giving 4693 ms. The reduction approximates 10 cm / 15.45 cm/s; curved-path speed
-  may differ, so this is a trial adjustment, not a new measured calibration.
-
-The library bias is applied separately for each movement so the straight trim
-does not alter either turn. Original measured tables remain unchanged. A fixed
-bias can compensate a consistent tendency, but cannot remove run-to-run drift.
+For the physical funnel test, upload with `pio run -e megaatmega2560 -t upload`,
+then open `pio device monitor` at 115200 baud. Stage 1 only starts when you send
+`1`, and continues automatically into Stage 2. Send `2` for a direct funnel test.
+Full logging starts automatically: every sensor update prints a timestamp,
+filtered distances, raw laser values, calibrated ultrasonic samples and LDRs.
+`--` marks invalid distances. `USnew=front/R45/none` identifies which ultrasonic
+was sampled in that update; the other ultrasonic reading is retained from its
+previous ping. Every Stage 1/2 decision prints its stage, state, action and reason,
+including waiting on invalid readings, comparisons, timed maneuvers and safety
+stops. Turn and 5 cm drive commands report PWM, bias and duration. No `T` command
+is needed. `S`/`X` stops the stage and its automatic logging; `T` independently
+toggles the slower sensor dashboard before or after a run.
