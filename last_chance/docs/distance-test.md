@@ -79,7 +79,7 @@ recorder uses your entered reference voltage. Motor outputs remain off.
 
 ## Run from PowerShell
 
-From `C:\Users\Efi\Documents\Arduino\last_chance`, close any serial monitor.
+From the `last_chance` project folder, close any serial monitor.
 Dependencies are installed in this project's `.venv`:
 
 ```powershell

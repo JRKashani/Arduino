@@ -1,0 +1,41 @@
+# --- Privacy: never upload secrets or machine-specific data ---
+
+# Environment files (keep *.example templates)
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+
+# Secrets, keys, credentials (keep *.example templates)
+arduino_secrets.h
+secrets.h
+secrets.json
+*secret*
+*credential*
+!*.example
+!*.example.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Editor files generated with absolute local paths (user name, home folder)
+**/.vscode/c_cpp_properties.json
+**/.vscode/launch.json
+**/.vscode/settings.json
+**/.vscode/arduino.json
+*.code-workspace
+**/.idea/
+
+# OS metadata
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Local scratch
+Temp.txt
+*.local
+*.local.*
